@@ -21,27 +21,12 @@
         android:id="@+id/tablayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:tabGravity="fill"
+        app:tabMode="fixed"
         android:background="@color/colorPrimary"
         app:tabSelectedTextColor="@android:color/white"
         app:tabTextColor="@android:color/black">
 
-        <android.support.design.widget.TabItem
-            android:id="@+id/tabRoom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rooms" />
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/tabFlashCard"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="FlashCard" />
-
-        <android.support.design.widget.TabItem
-            android:id="@+id/tabQuiz"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Quiz" />
 
     </android.support.design.widget.TabLayout>
 

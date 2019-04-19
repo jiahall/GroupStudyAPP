@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 public class QuizFragment extends Fragment {
 
+    View view;
+
     public QuizFragment() {
         // Required empty public constructor
     }
@@ -23,7 +25,8 @@ public class QuizFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
-        return inflater.inflate(R.layout.fragment_quiz, container, false);
+        view = inflater.inflate(R.layout.fragment_quiz, container, false);
+        return view;
     }
 
     @Override

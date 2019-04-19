@@ -1,34 +1,43 @@
 package android.jia.groupstudy;
 
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PageAdapter extends FragmentPagerAdapter {
 
     private int numOfTabs;
+    private final List<Fragment> fragmentList = new ArrayList<>();
+    private final List<String> FragmentListTitles = new ArrayList<>();
 
-    PageAdapter(FragmentManager fm, int numOfTabs) {
+    PageAdapter(FragmentManager fm) {
         super(fm);
-        this.numOfTabs = numOfTabs;
-    }
 
-    @Override
-    public int getCount() {
-        return numOfTabs;
     }
 
     @Override
     public Fragment getItem(int position) {
-        switch (position) {
-            case 0:
-                return new RoomFragment();
-            case 1:
-                return new FlashCardFragment();
-            case 2:
-                return new QuizFragment();
-            default:
-                return null;
-        }
+        return fragmentList.get(position);
+    }
+
+    @Override
+    public int getCount() {
+        return FragmentListTitles.size();
+    }
+
+    @Nullable
+    @Override
+    public CharSequence getPageTitle(int position) {
+        return FragmentListTitles.get(position);
+    }
+
+    public void AddFragment(Fragment fragment, String title) {
+        fragmentList.add(fragment);
+        FragmentListTitles.add(title);
+
     }
 }

@@ -1,7 +1,6 @@
 package android.jia.groupstudy;
 
 import android.os.Bundle;
-import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -28,15 +27,16 @@ public class MainActivity extends AppCompatActivity {
         final TabLayout tabLayout = findViewById(R.id.tablayout);
 
 
-        TabItem tabChats = findViewById(R.id.tabRoom);
-        TabItem tabStatus = findViewById(R.id.tabFlashCard);
-        TabItem tabCalls = findViewById(R.id.tabQuiz);
         final ViewPager viewPager = findViewById(R.id.viewPager);
 
         setSupportActionBar(toolbar);
 
-        PageAdapter pageAdapter = new PageAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
+        PageAdapter pageAdapter = new PageAdapter(getSupportFragmentManager());
+        pageAdapter.AddFragment(new RoomFragment(), "Room");
+        pageAdapter.AddFragment(new QuizFragment(), "Quiz");
+        pageAdapter.AddFragment(new FlashCardFragment(), "FlashCard");
         viewPager.setAdapter(pageAdapter);
+        tabLayout.setupWithViewPager(viewPager);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -78,8 +78,5 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public Boolean getTest() {
-        return test;
     }
-
-}
+    
