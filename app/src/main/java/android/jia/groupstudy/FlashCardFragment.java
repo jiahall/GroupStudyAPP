@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 public class FlashCardFragment extends Fragment {
 
+    private View view;
+
     public FlashCardFragment() {
         // Required empty public constructor
     }
@@ -22,7 +24,8 @@ public class FlashCardFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
-        return inflater.inflate(R.layout.fragment_flash_card, container, false);
+        view = inflater.inflate(R.layout.fragment_flash_card, container, false);
+        return view;
     }
 
     @Override

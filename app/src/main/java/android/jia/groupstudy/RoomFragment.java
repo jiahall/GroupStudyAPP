@@ -8,10 +8,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class RoomFragment extends Fragment {
+public class RoomFragment extends Fragment implements View.OnClickListener {
 
+
+    private View view;
+    String value;
 
     public RoomFragment() {
         // Required empty public constructor
@@ -23,7 +28,15 @@ public class RoomFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
-        return inflater.inflate(R.layout.fragment_room, container, false);
+        view = inflater.inflate(R.layout.fragment_room, container, false);
+
+        TextView textView = (TextView) view.findViewById(R.id.txtroom);
+        value = textView.getText().toString();
+        Button mCreateRoom = view.findViewById(R.id.btnCreateRoom);
+        mCreateRoom.setOnClickListener(this);
+
+
+        return view;
     }
 
     @Override
@@ -38,5 +51,16 @@ public class RoomFragment extends Fragment {
                     .show();
         }
         return true;
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btnCreateRoom:
+                Toast.makeText(getActivity(), "clicked on " + value, Toast.LENGTH_SHORT)
+                        .show();
+
+        }
+
     }
 }

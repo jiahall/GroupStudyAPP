@@ -18,6 +18,8 @@ import android.widget.Toast;
 public class ChatFragment extends Fragment {
 
 
+    private View view;
+
     public ChatFragment() {
         // Required empty public constructor
     }
@@ -27,18 +29,19 @@ public class ChatFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
-        return inflater.inflate(R.layout.fragment_chat, container, false);
+        view = inflater.inflate(R.layout.fragment_chat, container, false);
+        return view;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         setHasOptionsMenu(true);
-        inflater.inflate(R.menu.menu_flashcard, menu);
+        inflater.inflate(R.menu.menu_chat, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_flashcard) {
+        if (item.getItemId() == R.id.action_chat) {
             Toast.makeText(getActivity(), "clicked on " + item.getTitle(), Toast.LENGTH_SHORT)
                     .show();
         }
