@@ -1,11 +1,9 @@
 package android.jia.groupstudy;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,44 +12,46 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class RoomFragment extends Fragment implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener {
 
 
-    private FirebaseUser mFirebaseUser;
-
-    private DatabaseReference mFirebaseDatabaseReference;
-    private static final String TAG = "MainActivity";
-    public static final String MESSAGES_CHILD = "messages";
-    private static final int REQUEST_IMAGE = 2;
-    private static final String LOADING_IMAGE_URL = "https://www.google.com/images/spin-32.gif";
-    public static final String ANONYMOUS = "anonymous";
-    private String mUsername;
-    private String mPhotoUrl;
-    private SharedPreferences mSharedPreferences;
-    private GoogleApiClient mGoogleApiClient;
-    private static final String MESSAGE_URL = "http://friendlychat.firebase.google.com/message/";
-
-
-    private RecyclerView mMessageRecyclerView;
-    private LinearLayoutManager mLinearLayoutManager;
-    private ProgressBar mProgressBar;
-    private EditText mMessageEditText;
-    private ImageView mAddMessageImageView;
     private View view;
 
 
-    public FirebaseUser krump;
+    public FirebaseUser firebaseUserRoom;
     public MainActivity value;
     public String testUid;
+    String password;
+    String roomName;
+    final FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference findRoom;
+    DatabaseReference mkRoom;
+    DatabaseReference inputUser;
+    DatabaseReference checkUser;
+    Button joinRoom;
+
+    Boolean isBanned;
+
+    Room room;
+
+    Button btnRoomMaker;
+    Button btnRoomCreate;
+    EditText edtMakeRoomName;
+    EditText edtMakePassword;
+
+
     public RoomFragment() {
         // Required empty public constructor
     }
@@ -65,12 +65,25 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
         view = inflater.inflate(R.layout.fragment_room, container, false);
 
         value = (MainActivity) getActivity();
-        krump = value.mFirebaseUser;
+        firebaseUserRoom = value.mFirebaseUser;
         testUid = value.uId;
 
-        Button mCreateRoom = view.findViewById(R.id.btnCreateRoom);
-        mCreateRoom.setOnClickListener(this);
+        inputUser = database.getReference();
+        mkRoom = FirebaseDatabase.getInstance().getReference();
+        checkUser = FirebaseDatabase.getInstance().getReference("user");
 
+
+        findRoom = database.getReference("room");
+
+        btnRoomMaker = view.findViewById(R.id.btnRoomMaker);
+        btnRoomMaker.setOnClickListener(this);
+
+        btnRoomCreate = view.findViewById(R.id.btnRoomCreate);
+        btnRoomCreate.setOnClickListener(this);
+
+
+        edtMakeRoomName = view.findViewById(R.id.edtMakeRoomName);
+        edtMakePassword = view.findViewById(R.id.edtMakePassword);
 
 
         return view;
@@ -93,17 +106,104 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.btnCreateRoom:
-                Toast.makeText(getActivity(), "clicked on " + testUid, Toast.LENGTH_SHORT)
-                        .show();
+            case R.id.btnRoomMaker:
+                if (edtMakeRoomName.getVisibility() == View.GONE) {
+                    edtMakeRoomName.setVisibility(View.VISIBLE);
+                    edtMakePassword.setVisibility(View.VISIBLE);
+                    btnRoomMaker.setText("Close");
+                    btnRoomCreate.setVisibility(View.VISIBLE);
+                } else {
+                    edtMakeRoomName.setVisibility(View.GONE);
+                    edtMakePassword.setVisibility(View.GONE);
+                    btnRoomMaker.setText("Create room");
+                    btnRoomCreate.setVisibility(View.GONE);
+                }
+            case R.id.btnRoomCreate:
+                roomName = edtMakeRoomName.getText().toString();
+                password = edtMakePassword.getText().toString();
+
+                //Check to make sure there is data
+                if (checkData(roomName, password)) {
+
+                    findRoom.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.hasChild(roomName)) {
+                                Toast.makeText(getActivity(), "Sorry that name is taken", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Room room;
+                                room = new Room();
+                                room.setOwnerDisplayName(firebaseUserRoom.getDisplayName());
+                                room.setColor("testBlue");
+                                room.setOwnerUid(firebaseUserRoom.getUid());
+                                room.setPassword(password);
+
+                                mkRoom.child("room").child(roomName).setValue(room).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Toast.makeText(getActivity(), "Room Created", Toast.LENGTH_SHORT).show();
+                                        checkUser.child("/" + firebaseUserRoom.getUid() + "/member").child(roomName).setValue((true));
 
 
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            Toast.makeText(getActivity(), "oops, somthing went wrong, please check internet connection", Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+
+                } else {
+                    Toast.makeText(getActivity(), "Please input at least 4 characters in both fields", Toast.LENGTH_SHORT).show();
+                }
         }
-
     }
+
+
+    private Boolean checkData(String name, String password) {
+        if (name.trim().length() >= 4 && password.trim().length() >= 4) {
+            Log.i("button clicked", "char 4 or over");
+            Toast.makeText(getActivity(), "checking details name of Room: " + name + "checking password" + password, Toast.LENGTH_SHORT).show();
+            return true;
+
+        } else {
+            return false;
+        }
+    }
+
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
+    private Boolean addUser(String roomName, String userName) {
+
+        inputUser.child("user/" + userName + "/banned/" + roomName).addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot data) {
+                if (data.exists()) {
+                    System.out.println("nah he's banned lol");
+                    isBanned = true;
+                } else {
+                    System.out.println("ok ok he's going in");
+                    isBanned = false;
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        return isBanned;
+    }
 }
+
+

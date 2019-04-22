@@ -2,6 +2,7 @@ package android.jia.groupstudy;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -11,8 +12,11 @@ import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -23,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     FirebaseUser mFirebaseUser;
     private String mUsername;
     private String mPhotoUrl;
+    String key;
 
     String uId;
 
@@ -32,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     final DatabaseReference getTest = database.getReference("message");
     DatabaseReference mDataBase;
     DatabaseReference isThere;
+    DatabaseReference checkMem;
 
 
     User userTst;
@@ -44,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
 
         mDataBase = database.getReference("user/Bipper/member");
         isThere = database.getReference("user");
+        checkMem = database.getReference();
+
 
         test = FirebaseDatabase.getInstance().getReference()
                 .child("user");
@@ -125,13 +133,108 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
+
+            /*test.child("goffer").child("member").child("goony").setValue((true));*/
+
+            //If there is not already a user in the database this will make them
+            isThere.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.hasChild("/" + uId)) {
+                        System.out.println("yeh he's here");
+
+
+                    } else {
+                        userTst = new User();
+                        userTst.setDisplayName(mUsername);
+                        test.child(uId).setValue(userTst);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+
+
+/*            checkMem.child("room/aaaa").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()){
+                        System.out.println(dataSnapshot.getKey());
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });*/
+           /* THIS WORKS GETS A MEMBER THEN FILDS ALL ROOMS THEIR IN isThere.child("Bipper/member").orderByKey().addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (final DataSnapshot child : dataSnapshot.getChildren()){
+                         key = child.getKey();
+
+                        System.out.println("checking" + key);
+                        checkMem.child("room/"+key).addListenerForSingleValueEvent(new ValueEventListener() {
+                            String zoop = key;
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot data) {
+                                if (data.exists()){
+                                    System.out.println(data.getValue()+"is real");
+                                }
+                                else{
+                                    System.out.println(zoop +"is not real");
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });*/
+
+
+/*            isThere.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    for(DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()){
+                        //Loop 1 to go through all the child nodes of users
+                        for(DataSnapshot booksSnapshot : uniqueKeySnapshot.child("member").getChildren()){
+                            //loop 2 to go through all the child nodes of books node
+                            String bookskey = booksSnapshot.getKey();
+                            Boolean booksValue = (Boolean) booksSnapshot.getValue();
+                            Log.i(TAG, "The group is " + bookskey +"the value" + booksValue  );
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });*/
+
            /*
            GET ALL CHILDREN WITH KEY EQUAL TO BEEF= 12
-           Query query = isThere.orderByChild("beef").equalTo(12);
+           */
+/*           Query query = checkMem.orderByChild("/Bipper/member");
             query.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String prevChildKey) {
-                    System.out.println(dataSnapshot.getKey() + " got 12 whole beef" );
+                    System.out.println(" got 12 whole beef" + dataSnapshot.getKey() );
                 }
 
                 @Override
@@ -156,11 +259,11 @@ public class MainActivity extends AppCompatActivity {
             });*/
 
 
-/* CHECK IF A USER IS THERE
-isThere.addListenerForSingleValueEvent(new ValueEventListener() {
+
+/*isThere.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.hasChild("Bipper/member/boon")){
+                    if (dataSnapshot.hasChild("Bipper/member/boony")){
                         System.out.println("yeh he's here");
                     }
                     else{
@@ -209,10 +312,12 @@ isThere.addListenerForSingleValueEvent(new ValueEventListener() {
 /*            userTst = new User();
             userTst.setMember("hi");
             userTst.setBanned("hello");
+            us
             test.child("goffer").child("member").child("goony").setValue((true));*/
 
         }
+
     }
 
-}
 
+}
