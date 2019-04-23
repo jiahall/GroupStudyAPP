@@ -181,9 +181,9 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
 
     }
 
-    private Boolean addUser(String roomName, String userName) {
+    private Boolean addUser(final String roomName) {
 
-        inputUser.child("user/" + userName + "/banned/" + roomName).addListenerForSingleValueEvent(new ValueEventListener() {
+        inputUser.child("user/" + firebaseUserRoom.getUid() + "/banned/" + roomName).addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(@NonNull DataSnapshot data) {
@@ -192,7 +192,7 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
                     isBanned = true;
                 } else {
                     System.out.println("ok ok he's going in");
-                    isBanned = false;
+                    checkUser.child("/" + firebaseUserRoom.getUid() + "/member").child(roomName).setValue((true));
                 }
 
             }

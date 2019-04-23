@@ -2,18 +2,32 @@ package android.jia.groupstudy;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
-public class FlashCardFragment extends Fragment {
+public class FlashCardFragment extends Fragment implements View.OnClickListener, FlashCardDialogFragment.OnInputSelected {
+
+    private static String TAG = "FlashCardFragment";
+
+    @Override
+    public void sendInput(String input) {
+        Log.d(TAG, "sendInput: " + input);
+        txtDialogText.setText(input);
+
+    }
 
     private View view;
+    Button btnOpenFlashDialog;
+    public TextView txtDialogText;
 
     public FlashCardFragment() {
         // Required empty public constructor
@@ -25,6 +39,10 @@ public class FlashCardFragment extends Fragment {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
         view = inflater.inflate(R.layout.fragment_flash_card, container, false);
+        btnOpenFlashDialog = view.findViewById(R.id.btnOpenFlashDialog);
+        btnOpenFlashDialog.setOnClickListener(this);
+        txtDialogText = view.findViewById(R.id.txtDialogText);
+
         return view;
     }
 
@@ -42,4 +60,16 @@ public class FlashCardFragment extends Fragment {
         }
         return true;
     }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btnOpenFlashDialog:
+                FlashCardDialogFragment dialog = new FlashCardDialogFragment();
+                dialog.setTargetFragment(FlashCardFragment.this, 1);
+                dialog.show(getFragmentManager(), "FlashCardDialogFragment");
+        }
+    }
+
+
 }

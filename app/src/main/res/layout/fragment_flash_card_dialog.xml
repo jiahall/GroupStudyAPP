@@ -3,26 +3,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
     android:orientation="vertical"
-    tools:context=".FlashCardFragment">
+    tools:context=".FlashCardDialogFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/mActionOK"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="FlashCard" />
+        android:text="Send" />
 
     <Button
+        android:id="@+id/getmActionCancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btnOpenFlashDialog"
-        android:text="new flash Question" />
+        android:text="Close" />
 
-    <TextView
-        android:layout_width="wrap_content"
+    <EditText
+        android:id="@+id/mInput"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/txtDialogText"
-        android:text="test" />
+
+        android:inputType="textPersonName" />
+
 
 </LinearLayout>
