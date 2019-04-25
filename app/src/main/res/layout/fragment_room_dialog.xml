@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".FlashCardDialogFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <Button
+        android:id="@+id/getmActionCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create Room" />
+
+    <Button
+
+        android:id="@+id/mActionOK"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Close" />
+
+    <EditText
+        android:id="@+id/edtCreateRoomName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:hint="Room Name"
+        android:singleLine="true"
+        tools:ignore="MissingPrefix"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/edtCreatePassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:hint="Room Password"
+        android:singleLine="true"
+        tools:ignore="MissingPrefix"
+        android:inputType="text" />
+
+
+</LinearLayout>

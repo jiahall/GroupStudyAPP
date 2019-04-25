@@ -14,48 +14,40 @@
         android:text="Create Room"
         android:id="@+id/btnRoomMaker" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="find Room"
-        android:id="@+id/joinRoom" />
 
-    <EditText
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/edtJoinRoom"
-        android:hint="Enter Room Password"
-        android:singleLine="true"
-        tools:ignore="MissingPrefix"
-        android:inputType="text" />
+        android:orientation="horizontal">
 
-    <EditText
-        android:id="@+id/edtMakeRoomName"
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/edtJoinRoom"
+            android:hint="Enter Room Name"
+
+            tools:ignore="MissingPrefix"
+            android:inputType="text" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="find Room"
+            android:id="@+id/joinRoom" />
+
+
+    </LinearLayout>
+
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:hint="Room Name"
-        android:singleLine="true"
-        tools:ignore="MissingPrefix"
-        android:inputType="text"
-        android:visibility="gone" />
+        android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/edtMakePassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:hint="Room Password"
-        android:singleLine="true"
-        tools:ignore="MissingPrefix"
-        android:inputType="text"
-        android:visibility="gone" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Make Room"
-        android:id="@+id/btnRoomCreate"
-        android:visibility="gone" />
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/roomList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
 
 </LinearLayout>

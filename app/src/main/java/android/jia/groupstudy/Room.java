@@ -4,7 +4,6 @@ package android.jia.groupstudy;
 public class Room {
     String ownerUid;
     String ownerDisplayName;
-
     String password;
     String color;
 

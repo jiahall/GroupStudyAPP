@@ -114,6 +114,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+        if (mFirebaseUser == null) {
+            // Not signed in, launch the Sign In activity
+            startActivity(new Intent(this, SignInActivity.class));
+            finish();
+            return;
+        } else {
+            mUsername = mFirebaseUser.getDisplayName();
+            Log.i(TAG, "The userid is " + mFirebaseUser.getUid());
+            uId = mFirebaseUser.getUid();
+            if (mFirebaseUser.getPhotoUrl() != null) {
+                mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
+            }
+        }
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         // Initialize Firebase Auth
@@ -131,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
             if (mFirebaseUser.getPhotoUrl() != null) {
                 mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
             }
+
+
 
 
 
@@ -156,6 +178,37 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
+
+            checkMem.child("member/" + mFirebaseUser.getUid() + "/test1/status").addListenerForSingleValueEvent(new ValueEventListener() {
+
+                @Override
+                public void onDataChange(@NonNull DataSnapshot data) {
+                    if (data.exists()) {
+                        Log.i(TAG, "the value we're getting is: " + data.getValue());
+                        String info = data.getValue().toString();
+                        if (info.equals("member")) {
+                            Log.i(TAG, "yeh he's good");
+
+                        } else if (info.equals("banned")) {
+                            Log.i(TAG, "yikes he a no go");
+
+                        }
+
+                    } else {
+                        Log.i(TAG, "nobody lives here captain");
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+
+            });
+
+
+
+
 
 
 
@@ -204,28 +257,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });*/
-
-
-/*            isThere.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    for(DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()){
-                        //Loop 1 to go through all the child nodes of users
-                        for(DataSnapshot booksSnapshot : uniqueKeySnapshot.child("member").getChildren()){
-                            //loop 2 to go through all the child nodes of books node
-                            String bookskey = booksSnapshot.getKey();
-                            Boolean booksValue = (Boolean) booksSnapshot.getValue();
-                            Log.i(TAG, "The group is " + bookskey +"the value" + booksValue  );
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });*/
+           
 
            /*
            GET ALL CHILDREN WITH KEY EQUAL TO BEEF= 12
