@@ -1,5 +1,6 @@
 package android.jia.groupstudy;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -61,6 +62,8 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
     DatabaseReference roomRef;
     private DatabaseReference userRef;
     Boolean isBanned;
+    FirebaseRecyclerAdapter<Room, RoomViewHolder> adapter;
+    String roomID;
 
 
     EditText edtJoinRoom;
@@ -113,9 +116,9 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
         FirebaseRecyclerOptions<Room> options = new FirebaseRecyclerOptions.Builder<Room>()
                 .setQuery(findRoom.child(firebaseUserRoom.getUid()), Room.class).build();
 
-        FirebaseRecyclerAdapter<Room, RoomViewHolder> adapter = new FirebaseRecyclerAdapter<Room, RoomViewHolder>(options) {
+        adapter = new FirebaseRecyclerAdapter<Room, RoomViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull final RoomViewHolder holder, int position, @NonNull Room model) {
+            protected void onBindViewHolder(@NonNull final RoomViewHolder holder, final int position, @NonNull Room model) {
                 final String membership = getRef(position).getKey();
                 DatabaseReference getMembership = getRef(position).child("status").getRef();
 
@@ -130,7 +133,7 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
                             if (type.equals("member")) {
                                 roomRef.child(membership).addValueEventListener(new ValueEventListener() {
                                     @Override
-                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
                                         final String requestRoomName = dataSnapshot.getKey().toString();
                                         Log.i(TAG, "data i got is: " + requestRoomName);
                                         final String requestRoomOwner = dataSnapshot.child("ownerDisplayName").getValue().toString();
@@ -143,20 +146,43 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
                                         holder.roomOwner.setText(requestRoomOwner);
                                         holder.roomName.setText(requestRoomName);
                                         if (firebaseUserRoom.getUid().equals(requestOwnerUid)) {
-
-                                            holder.deleteRoom.setText("Borp!");
+                                            //set buttons depending on if room owner or not
                                             holder.deleteRoom.setVisibility(View.VISIBLE);
+                                            holder.leaveRoom.setVisibility(View.GONE);
 
                                         } else {
                                             holder.deleteRoom.setVisibility(View.GONE);
+                                            holder.leaveRoom.setVisibility(View.VISIBLE);
                                         }
 
+
+                                        holder.leaveRoom.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                Toast.makeText(getActivity(), "you just left: " + holder.roomName.getText().toString(), Toast.LENGTH_SHORT).show();
+                                                inputUser.child("member/" + firebaseUserRoom.getUid() + "/" + holder.roomName.getText().toString()).setValue(null);
+                                            }
+                                        });
+                                        holder.deleteRoom.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                Toast.makeText(getActivity(), "you just deleted: " + holder.roomName.getText().toString(), Toast.LENGTH_SHORT).show();
+                                                getRef(position).removeValue();
+                                                inputUser.child("room/" + holder.roomName.getText().toString()).removeValue();
+                                                inputUser.child("messages/" + holder.roomName.getText().toString()).removeValue();
+
+                                            }
+                                        });
                                         holder.itemView.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View view) {
                                                 Toast.makeText(getActivity(), "going to room " + holder.roomName.getText().toString()
                                                         , Toast.LENGTH_SHORT)
                                                         .show();
+                                                roomID = holder.roomName.getText().toString();
+                                                Intent intent = new Intent(getContext(), ChatActivity.class);
+                                                intent.putExtra("ROOM_DATA", roomID);
+                                                startActivity(intent);
                                             }
                                         });
                                     }
@@ -168,9 +194,11 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
                                 });
 
                             } else {
+                                //Hide's rooms user is banned from
                                 holder.roomOwner.setVisibility(View.GONE);
                                 holder.roomName.setVisibility(View.GONE);
                                 holder.deleteRoom.setVisibility(View.GONE);
+                                holder.leaveRoom.setVisibility(View.GONE);
                             }
 
 
@@ -199,9 +227,10 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
         adapter.startListening();
     }
 
+
     public static class RoomViewHolder extends RecyclerView.ViewHolder {
         TextView roomOwner, roomName;
-        Button deleteRoom;
+        Button deleteRoom, leaveRoom;
 
 
         public RoomViewHolder(@NonNull View itemView) {
@@ -210,6 +239,7 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
             roomName = itemView.findViewById(R.id.roomName);
             roomOwner = itemView.findViewById(R.id.roomOwner);
             deleteRoom = itemView.findViewById(R.id.deleteRoom);
+            leaveRoom = itemView.findViewById(R.id.leaveRoom);
 
         }
     }

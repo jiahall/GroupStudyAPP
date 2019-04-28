@@ -6,5 +6,5 @@
         android:id="@+id/action_chat"
         android:icon="@drawable/ic_more_vert_black_24dp"
         android:title="Chat"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 </menu>

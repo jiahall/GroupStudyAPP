@@ -1,6 +1,20 @@
-/*
 package android.jia.groupstudy;
 
+/*
+ * Copyright Google Inc. All Rights Reserved.
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,8 +22,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -35,6 +49,7 @@ import com.firebase.ui.database.SnapshotParser;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,13 +64,8 @@ import com.google.firebase.storage.UploadTask;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-
-*/
-/**
- * A simple {@link Fragment} subclass.
- *//*
-
-public class ChatFragment extends Fragment implements GoogleApiClient.OnConnectionFailedListener {
+public class ChatActivity extends AppCompatActivity
+        implements GoogleApiClient.OnConnectionFailedListener {
 
     public static class MessageViewHolder extends RecyclerView.ViewHolder {
         TextView messageTextView;
@@ -78,15 +88,15 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
     private DatabaseReference mFirebaseDatabaseReference;
     private FirebaseRecyclerAdapter<ChatMessage, MessageViewHolder>
             mFirebaseAdapter;
-    private static final String TAG = "MainActivity";
-    public static final String MESSAGES_CHILD = "messages";
+    private static final String TAG = "ChatActivity";
+    public static final String MESSAGES_CHILD = "messages/";
     private static final int REQUEST_IMAGE = 2;
     private static final String LOADING_IMAGE_URL = "https://www.google.com/images/spin-32.gif";
     public static final String ANONYMOUS = "anonymous";
     private String mUsername;
     private String mPhotoUrl;
     private SharedPreferences mSharedPreferences;
-
+    private GoogleApiClient mGoogleApiClient;
     private static final String MESSAGE_URL = "http://friendlychat.firebase.google.com/message/";
 
     private Button mSendButton;
@@ -95,29 +105,30 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
     private ProgressBar mProgressBar;
     private EditText mMessageEditText;
     private ImageView mAddMessageImageView;
+    String roomId;
+
 
     // Firebase instance variables
-    private View view;
-
-    public ChatFragment() {
-        // Required empty public constructor
-    }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        setHasOptionsMenu(true);
-        view = inflater.inflate(R.layout.fragment_chat, container, false);
-        mSharedPreferences = (SharedPreferences) PreferenceManager.getDefaultSharedPreferences(this);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_chat);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         // Set default username is anonymous.
+        roomId = getIntent().getStringExtra("ROOM_DATA");
         mUsername = ANONYMOUS;
+        Toast.makeText(this, roomId, Toast.LENGTH_SHORT).show();
 
 
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API)
+                .build();
 
         // Initialize ProgressBar and RecyclerView.
-        mProgressBar = view.findViewById(R.id.progressBar);
-        mMessageRecyclerView = view.findViewById(R.id.messageRecyclerView);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mMessageRecyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
         mLinearLayoutManager = new LinearLayoutManager(this);
         mLinearLayoutManager.setStackFromEnd(true);
         mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
@@ -135,7 +146,7 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
             }
         };
 
-        DatabaseReference messagesRef = mFirebaseDatabaseReference.child(MESSAGES_CHILD);
+        DatabaseReference messagesRef = mFirebaseDatabaseReference.child(MESSAGES_CHILD + roomId);
         FirebaseRecyclerOptions<ChatMessage> options =
                 new FirebaseRecyclerOptions.Builder<ChatMessage>()
                         .setQuery(messagesRef, parser)
@@ -150,14 +161,14 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
             @Override
             protected void onBindViewHolder(final MessageViewHolder viewHolder,
                                             int position,
-                                            ChatMessage friendlyMessage) {
+                                            ChatMessage chatMessage) {
                 mProgressBar.setVisibility(ProgressBar.INVISIBLE);
-                if (friendlyMessage.getText() != null) {
-                    viewHolder.messageTextView.setText(friendlyMessage.getText());
+                if (chatMessage.getText() != null) {
+                    viewHolder.messageTextView.setText(chatMessage.getText());
                     viewHolder.messageTextView.setVisibility(TextView.VISIBLE);
                     viewHolder.messageImageView.setVisibility(ImageView.GONE);
-                } else if (friendlyMessage.getImageUrl() != null) {
-                    String imageUrl = friendlyMessage.getImageUrl();
+                } else if (chatMessage.getImageUrl() != null) {
+                    String imageUrl = chatMessage.getImageUrl();
                     if (imageUrl.startsWith("gs://")) {
                         StorageReference storageReference = FirebaseStorage.getInstance()
                                 .getReferenceFromUrl(imageUrl);
@@ -178,7 +189,7 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
                                 });
                     } else {
                         Glide.with(viewHolder.messageImageView.getContext())
-                                .load(friendlyMessage.getImageUrl())
+                                .load(chatMessage.getImageUrl())
                                 .into(viewHolder.messageImageView);
                     }
                     viewHolder.messageImageView.setVisibility(ImageView.VISIBLE);
@@ -187,12 +198,12 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
 
 
                 viewHolder.messengerTextView.setText(chatMessage.getName());
-                if (friendlyMessage.getPhotoUrl() == null) {
-                    viewHolder.messengerImageView.setImageDrawable(ContextCompat.getDrawable(MainActivity.this,
-                            R.drawable.ic_account_circle_black_36dp));
+                if (chatMessage.getPhotoUrl() == null) {
+                    viewHolder.messengerImageView.setImageDrawable(ContextCompat.getDrawable(ChatActivity.this,
+                            R.drawable.ic_account_circle_black_24dp));
                 } else {
-                    Glide.with(MainActivity.this)
-                            .load(friendlyMessage.getPhotoUrl())
+                    Glide.with(ChatActivity.this)
+                            .load(chatMessage.getPhotoUrl())
                             .into(viewHolder.messengerImageView);
                 }
 
@@ -219,7 +230,7 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
 
         mMessageRecyclerView.setAdapter(mFirebaseAdapter);
 
-        mMessageEditText = view.findViewById(R.id.messageEditText);
+        mMessageEditText = (EditText) findViewById(R.id.messageEditText);
         mMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -239,23 +250,21 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
             }
         });
 
-        mSendButton = view.findViewById(R.id.sendButton);
+        mSendButton = (Button) findViewById(R.id.sendButton);
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ChatMessage friendlyMessage = new
+                ChatMessage chatMessage = new
                         ChatMessage(mMessageEditText.getText().toString(),
                         mUsername,
                         mPhotoUrl,
-                        null */
-/* no image *//*
-);
-                mFirebaseDatabaseReference.child(MESSAGES_CHILD)
-                        .push().setValue(friendlyMessage);
+                        null /* no image */);
+                mFirebaseDatabaseReference.child(MESSAGES_CHILD + roomId)
+                        .push().setValue(chatMessage);
                 mMessageEditText.setText("");
             }
         });
-        mAddMessageImageView = view.findViewById(R.id.addMessageImageView);
+        mAddMessageImageView = (ImageView) findViewById(R.id.addMessageImageView);
         mAddMessageImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -265,13 +274,26 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
                 startActivityForResult(intent, REQUEST_IMAGE);
             }
         });
-        return view;
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        setHasOptionsMenu(true);
-        inflater.inflate(R.menu.menu_chat, menu);
+    public void onStart() {
+        super.onStart();
+        // Initialize Firebase Auth
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+        if (mFirebaseUser == null) {
+            // Not signed in, launch the Sign In activity
+            Log.i(TAG, "you got kicked out of chat activity");
+            startActivity(new Intent(this, SignInActivity.class));
+            finish();
+            return;
+        } else {
+            mUsername = mFirebaseUser.getDisplayName();
+            if (mFirebaseUser.getPhotoUrl() != null) {
+                mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
+            }
+        }
     }
 
     @Override
@@ -292,14 +314,22 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_chat) {
-            Toast.makeText(getActivity(), "clicked on " + item.getTitle(), Toast.LENGTH_SHORT)
-                    .show();
-        }
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_chat, menu);
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_chat:
+                Log.i(TAG, "yeh you clicked the menu");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -314,7 +344,7 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
 
                     ChatMessage tempMessage = new ChatMessage(null, mUsername, mPhotoUrl,
                             LOADING_IMAGE_URL);
-                    mFirebaseDatabaseReference.child(MESSAGES_CHILD).push()
+                    mFirebaseDatabaseReference.child(MESSAGES_CHILD + roomId).push()
                             .setValue(tempMessage, new DatabaseReference.CompletionListener() {
                                 @Override
                                 public void onComplete(DatabaseError databaseError,
@@ -339,24 +369,36 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
         }
     }
 
-    private void putImageInStorage(StorageReference storageReference, Uri uri, final String key) {
-        storageReference.putFile(uri).addOnCompleteListener(MainActivity.this,
-                new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            ChatMessage friendlyMessage =
-                                    new ChatMessage(null, mUsername, mPhotoUrl,
-                                            task.getResult().getStorage().getDownloadUrl()
-                                                    .toString());
-                            mFirebaseDatabaseReference.child(MESSAGES_CHILD).child(key)
-                                    .setValue(friendlyMessage);
-                        } else {
-                            Log.w(TAG, "Image upload task was not successful.",
-                                    task.getException());
-                        }
-                    }
-                });
+    private void putImageInStorage(final StorageReference storageReference, Uri uri, final String key) {
+
+        UploadTask uploadTask = storageReference.putFile(uri);
+
+        Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+
+                return storageReference.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                if (task.isSuccessful()) {
+
+                    String downloadUrl = task.getResult().toString();
+
+                    ChatMessage chatMessage = new ChatMessage(null, mUsername, mPhotoUrl, downloadUrl);
+
+                    mFirebaseDatabaseReference.child(MESSAGES_CHILD + roomId).child(key).setValue(chatMessage);
+
+                } else {
+                    Log.w(TAG, "Image upload task was not successful.",
+                            task.getException());
+                }
+            }
+        });
     }
 
     @Override
@@ -367,4 +409,3 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
         Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
     }
 }
-*/

@@ -12,11 +12,14 @@ import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.annotations.Nullable;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -55,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
 
         test = FirebaseDatabase.getInstance().getReference()
                 .child("user");
-
         fragPass = "it works";
         final Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(getResources().getString(R.string.app_name));
@@ -150,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
             uId = mFirebaseUser.getUid();
             if (mFirebaseUser.getPhotoUrl() != null) {
                 mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
+                RoomCheck();
             }
 
 
@@ -179,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            checkMem.child("member/" + mFirebaseUser.getUid() + "/test1/status").addListenerForSingleValueEvent(new ValueEventListener() {
+            /*checkMem.child("member/" + mFirebaseUser.getUid() + "/test1/status").addListenerForSingleValueEvent(new ValueEventListener() {
 
                 @Override
                 public void onDataChange(@NonNull DataSnapshot data) {
@@ -204,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
 
-            });
+            });*/
 
 
 
@@ -262,37 +265,10 @@ public class MainActivity extends AppCompatActivity {
            /*
            GET ALL CHILDREN WITH KEY EQUAL TO BEEF= 12
            */
-/*           Query query = checkMem.orderByChild("/Bipper/member");
-            query.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String prevChildKey) {
-                    System.out.println(" got 12 whole beef" + dataSnapshot.getKey() );
-                }
-
-                @Override
-                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });*/
 
 
 
-/*isThere.addListenerForSingleValueEvent(new ValueEventListener() {
+            /*isThere.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.hasChild("Bipper/member/boony")){
@@ -351,5 +327,57 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void RoomCheck() {
+        Query query = checkMem.child("member/" + mFirebaseUser.getUid()).orderByKey();
+        query.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String prevChildKey) {
+                Log.i(TAG, " got 12 whole beef" + dataSnapshot.getKey());
 
+                checkMem.child("room/" + dataSnapshot.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            System.out.println("the room is real");
+
+
+                        } else {
+                            System.out.println("this room aint real");
+                            checkMem.child("member/" + mFirebaseUser.getUid() + "/" + dataSnapshot.getKey()).removeValue();
+                            checkMem.child("messages/" + dataSnapshot.getKey()).removeValue();
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+
+                });
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @android.support.annotation.Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @android.support.annotation.Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+
+        });
+    }
 }

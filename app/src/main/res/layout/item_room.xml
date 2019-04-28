@@ -21,12 +21,12 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <!--<Button
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Leave Room"
             android:id="@+id/leaveRoom"
-            android:visibility="gone"/>-->
+            android:visibility="invisible" />
 
         <Button
             android:layout_width="wrap_content"
