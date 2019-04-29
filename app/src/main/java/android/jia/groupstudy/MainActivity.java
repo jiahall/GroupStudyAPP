@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference mDataBase;
     DatabaseReference isThere;
     DatabaseReference checkMem;
+    DatabaseReference checkFlash;
 
 
     User userTst;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         mDataBase = database.getReference("user/Bipper/member");
         isThere = database.getReference("user");
         checkMem = database.getReference();
+        checkFlash = database.getReference();
 
 
         test = FirebaseDatabase.getInstance().getReference()
@@ -181,6 +183,8 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
+
+
 
             /*checkMem.child("member/" + mFirebaseUser.getUid() + "/test1/status").addListenerForSingleValueEvent(new ValueEventListener() {
 
