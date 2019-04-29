@@ -1,31 +1,12 @@
-/*
 package android.jia.groupstudy;
-
-*/
-/*
- * Copyright Google Inc. All Rights Reserved.
- * <p/>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *//*
-
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -65,8 +46,11 @@ import com.google.firebase.storage.UploadTask;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ChatActivity extends AppCompatActivity
-        implements GoogleApiClient.OnConnectionFailedListener {
+import static android.app.Activity.RESULT_OK;
+
+
+public class ChatFragment extends Fragment implements GoogleApiClient.OnConnectionFailedListener {
+
 
     public static class MessageViewHolder extends RecyclerView.ViewHolder {
         TextView messageTextView;
@@ -89,7 +73,10 @@ public class ChatActivity extends AppCompatActivity
     private DatabaseReference mFirebaseDatabaseReference;
     private FirebaseRecyclerAdapter<ChatMessage, MessageViewHolder>
             mFirebaseAdapter;
-    private static final String TAG = "ChatActivity";
+    private static final String TAG = "ChatFragment";
+    public EnteredActivity value;
+
+
     public static final String MESSAGES_CHILD = "messages/";
     private static final int REQUEST_IMAGE = 2;
     private static final String LOADING_IMAGE_URL = "https://www.google.com/images/spin-32.gif";
@@ -107,20 +94,32 @@ public class ChatActivity extends AppCompatActivity
     private EditText mMessageEditText;
     private ImageView mAddMessageImageView;
     String roomId;
+    View view;
+
+    public ChatFragment() {
+    }
+
+    // Required empty public constructor
 
 
     // Firebase instance variables
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat);
-        roomId = getIntent().getStringExtra("ROOM_DATA");
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
+        setHasOptionsMenu(true);
+        view = inflater.inflate(R.layout.fragment_chat, container, false);
+
+
+        value = (EnteredActivity) getActivity();
+        roomId = value.roomId;
 
         // Initialize ProgressBar and RecyclerView.
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mMessageRecyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
-        mLinearLayoutManager = new LinearLayoutManager(this);
+        mProgressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        mMessageRecyclerView = (RecyclerView) view.findViewById(R.id.messageRecyclerView);
+        /*mLinearLayoutManager = new LinearLayoutManager(this);*/
+        mLinearLayoutManager = new LinearLayoutManager(getContext());
         mLinearLayoutManager.setStackFromEnd(true);
         mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
 
@@ -190,10 +189,12 @@ public class ChatActivity extends AppCompatActivity
 
                 viewHolder.messengerTextView.setText(chatMessage.getName());
                 if (chatMessage.getPhotoUrl() == null) {
-                    viewHolder.messengerImageView.setImageDrawable(ContextCompat.getDrawable(ChatActivity.this,
+                    /*viewHolder.messengerImageView.setImageDrawable(ContextCompat.getDrawable(ChatActivity.this,*/
+                    viewHolder.messengerImageView.setImageDrawable(ContextCompat.getDrawable(getActivity(),
                             R.drawable.ic_account_circle_black_24dp));
                 } else {
-                    Glide.with(ChatActivity.this)
+                    /*Glide.with(EnteredActivity.this)*/
+                    Glide.with(getActivity())
                             .load(chatMessage.getPhotoUrl())
                             .into(viewHolder.messengerImageView);
                 }
@@ -221,7 +222,7 @@ public class ChatActivity extends AppCompatActivity
 
         mMessageRecyclerView.setAdapter(mFirebaseAdapter);
 
-        mMessageEditText = (EditText) findViewById(R.id.messageEditText);
+        mMessageEditText = (EditText) view.findViewById(R.id.messageEditText);
         mMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -241,7 +242,7 @@ public class ChatActivity extends AppCompatActivity
             }
         });
 
-        mSendButton = (Button) findViewById(R.id.sendButton);
+        mSendButton = (Button) view.findViewById(R.id.sendButton);
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -249,15 +250,13 @@ public class ChatActivity extends AppCompatActivity
                         ChatMessage(mMessageEditText.getText().toString(),
                         mUsername,
                         mPhotoUrl,
-                        null */
-/* no image *//*
-);
+                        null /* no image */);
                 mFirebaseDatabaseReference.child(MESSAGES_CHILD + roomId)
                         .push().setValue(chatMessage);
                 mMessageEditText.setText("");
             }
         });
-        mAddMessageImageView = (ImageView) findViewById(R.id.addMessageImageView);
+        mAddMessageImageView = (ImageView) view.findViewById(R.id.addMessageImageView);
         mAddMessageImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -267,6 +266,7 @@ public class ChatActivity extends AppCompatActivity
                 startActivityForResult(intent, REQUEST_IMAGE);
             }
         });
+        return view;
     }
 
     @Override
@@ -278,14 +278,14 @@ public class ChatActivity extends AppCompatActivity
         if (mFirebaseUser == null) {
             // Not signed in, launch the Sign In activity
             Log.i(TAG, "you got kicked out of chat activity");
-            startActivity(new Intent(this, SignInActivity.class));
-            finish();
+            startActivity(new Intent(getActivity(), SignInActivity.class));
+            getActivity().finish();
             return;
         } else {
             mUsername = mFirebaseUser.getDisplayName();
             if (mFirebaseUser.getPhotoUrl() != null) {
                 mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
-                Toast.makeText(this, "you are: " + mFirebaseUser.getDisplayName() + " in Room: " + roomId, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "you are: " + mFirebaseUser.getDisplayName() + " in Room: " + roomId, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -308,10 +308,9 @@ public class ChatActivity extends AppCompatActivity
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_chat, menu);
-        return true;
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_room, menu);
+
     }
 
     @Override
@@ -326,7 +325,7 @@ public class ChatActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
 
@@ -400,7 +399,11 @@ public class ChatActivity extends AppCompatActivity
         // An unresolvable error has occurred and Google APIs (including Sign-In) will not
         // be available.
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
-        Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "Google Play Services error.", Toast.LENGTH_SHORT).show();
     }
 }
-*/
+
+
+
+
+

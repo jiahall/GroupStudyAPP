@@ -8,7 +8,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Toast;
 
 
 public class FlashCardDialogFragment extends DialogFragment implements View.OnClickListener {
@@ -16,7 +18,7 @@ public class FlashCardDialogFragment extends DialogFragment implements View.OnCl
     private static final String TAG = "FlashCardDialogFragment";
 
     public interface OnInputSelected {
-        void sendInput(String input);
+        void sendInput(String input, boolean anonymous);
     }
 
     public OnInputSelected mOnInputSelected;
@@ -24,6 +26,8 @@ public class FlashCardDialogFragment extends DialogFragment implements View.OnCl
 
     public EditText mInput;
     Button mActionOK, getmActionCancel;
+    public CheckBox setAnon;
+    boolean anonymous;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -36,6 +40,7 @@ public class FlashCardDialogFragment extends DialogFragment implements View.OnCl
         mActionOK.setOnClickListener(this);
         getmActionCancel = view.findViewById(R.id.getmActionCancel);
         getmActionCancel.setOnClickListener(this);
+        setAnon = view.findViewById(R.id.setAnon);
 
 
         return view;
@@ -56,17 +61,25 @@ public class FlashCardDialogFragment extends DialogFragment implements View.OnCl
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.mActionOK:
-                getDialog().dismiss();
-            case R.id.getmActionCancel:
-                String input = mInput.getText().toString();
-                if (!input.equals("")) {
-
-
-                    mOnInputSelected.sendInput(input);
-
-
+                Log.i(TAG, "pressed send");
+                if (setAnon.isChecked()) {
+                    anonymous = true;
                 }
+                String input = mInput.getText().toString();
+                if ((input.trim().length() >= 4)) {
+
+                    mOnInputSelected.sendInput(input, anonymous);
+                    getDialog().dismiss();
+                } else {
+                    Toast.makeText(getActivity(), "Please input at least 4 characters in both fields", Toast.LENGTH_SHORT).show();
+                }
+
+                break;
+            case R.id.getmActionCancel:
+                Log.i(TAG, "pressed cancel");
+
                 getDialog().dismiss();
+                break;
         }
     }
 }

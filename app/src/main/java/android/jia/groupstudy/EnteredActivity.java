@@ -43,6 +43,7 @@ public class EnteredActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         roomId = getIntent().getStringExtra("ROOM_DATA");
+        Log.i(TAG, "the room id is: " + roomId);
         final Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(getResources().getString(R.string.app_name));
         final TabLayout tabLayout = findViewById(R.id.tablayout);
@@ -53,6 +54,7 @@ public class EnteredActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         PageAdapter pageAdapter = new PageAdapter(getSupportFragmentManager());
+        pageAdapter.AddFragment(new ChatFragment(), "Chat");
         pageAdapter.AddFragment(new QuizFragment(), "Quiz");
         pageAdapter.AddFragment(new FlashCardFragment(), "FlashCard");
         viewPager.setAdapter(pageAdapter);

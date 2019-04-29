@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class RoomDialogFragment extends DialogFragment implements View.OnClickListener {
 
@@ -25,6 +26,7 @@ public class RoomDialogFragment extends DialogFragment implements View.OnClickLi
 
     public EditText edtCreateRoomName, edtCreatePassword;
     public Button mActionOK, getmActionCancel;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -59,20 +61,24 @@ public class RoomDialogFragment extends DialogFragment implements View.OnClickLi
         switch (view.getId()) {
             case R.id.mActionOK:
                 getDialog().dismiss();
+                break;
             case R.id.getmActionCancel:
                 String rmName = edtCreateRoomName.getText().toString();
                 String rmPass = edtCreatePassword.getText().toString();
                 Log.i(TAG, rmName + " " + rmPass);
-                if (!rmName.equals("") && !rmPass.equals("")) {
+                if ((rmName.trim().length() >= 4 && rmPass.trim().length() >= 4)) {
                     Log.i(TAG, "yeh 4 characters");
 
 
                     mOnRoomCreate.sendInput(rmName, rmPass);
                     getDialog().dismiss();
+                } else {
+                    Toast.makeText(getActivity(), "Please input at least 4 characters in both fields", Toast.LENGTH_SHORT).show();
 
 
                 }
 
+                break;
         }
     }
 }

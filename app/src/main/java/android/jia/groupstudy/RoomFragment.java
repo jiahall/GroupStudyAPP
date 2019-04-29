@@ -38,13 +38,9 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
     @Override
     public void sendInput(String rmName, String rmPass) {
         Log.i(TAG, "just sent data back from dialog ");
-        if (checkData(rmName, rmName)) {
 
             addRoom(rmName, rmPass);
 
-        } else {
-            Toast.makeText(getActivity(), "Please input at least 4 characters in both fields", Toast.LENGTH_SHORT).show();
-        }
 
     }
 
@@ -180,7 +176,7 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
                                                         , Toast.LENGTH_SHORT)
                                                         .show();
                                                 roomID = holder.roomName.getText().toString();
-                                                Intent intent = new Intent(getContext(), ChatActivity.class);
+                                                Intent intent = new Intent(getContext(), EnteredActivity.class);
                                                 intent.putExtra("ROOM_DATA", roomID);
                                                 startActivity(intent);
                                             }
@@ -359,19 +355,6 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
 
             }
         });
-    }
-
-
-    private Boolean checkData(String name, String password) {
-        if (name.trim().length() >= 4 && password.trim().length() >= 4) {
-            Log.i(TAG, "char 4 or over");
-            Toast.makeText(getActivity(), "checking details name of Room: " + name + "checking password" + password, Toast.LENGTH_SHORT).show();
-            return true;
-
-        } else {
-            Toast.makeText(getActivity(), "gotta be 4 char or more", Toast.LENGTH_SHORT).show();
-            return false;
-        }
     }
 
 
