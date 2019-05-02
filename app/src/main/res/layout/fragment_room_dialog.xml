@@ -6,19 +6,6 @@
     android:orientation="vertical"
     tools:context=".FlashCardDialogFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <Button
-        android:id="@+id/getmActionCancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Create Room" />
-
-    <Button
-
-        android:id="@+id/mActionOK"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Close" />
 
     <EditText
         android:id="@+id/edtCreateRoomName"
@@ -40,5 +27,20 @@
         tools:ignore="MissingPrefix"
         android:inputType="text" />
 
+    <Button
+        android:id="@+id/getmActionCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create Room"
+        android:layout_margin="5dp"
+        android:background="@drawable/btnstyle" />
+
+    <Button
+        android:id="@+id/mActionOK"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Close"
+        android:layout_margin="5dp"
+        android:background="@drawable/btnstyle" />
 
 </LinearLayout>

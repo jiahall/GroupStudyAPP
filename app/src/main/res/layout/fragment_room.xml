@@ -6,13 +6,14 @@
     tools:context=".RoomFragment"
     android:orientation="vertical">
 
-    <!-- TODO: Update blank fragment layout -->
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Create Room"
-        android:id="@+id/btnRoomMaker" />
+        android:id="@+id/btnRoomMaker"
+        android:layout_margin="5dp"
+        android:background="@drawable/btnstyle" />
 
 
     <LinearLayout
@@ -33,7 +34,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="find Room"
-            android:id="@+id/joinRoom" />
+            android:id="@+id/joinRoom"
+            android:layout_margin="5dp"
+            android:background="@drawable/btnstyle" />
 
 
     </LinearLayout>

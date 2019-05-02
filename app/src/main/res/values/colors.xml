@@ -6,4 +6,6 @@
     <color name="rooms">#000000</color>
     <color name="quiz">#FFEB3B</color>
     <color name="flashcard">#FF9800</color>
+    <color name="list">#DAD6CF</color>
+
 </resources>

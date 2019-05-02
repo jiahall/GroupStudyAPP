@@ -135,6 +135,13 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
             protected void onBindViewHolder(final FlashcardViewHolder viewHolder,
                                             int position,
                                             final Flashcard flashcard) {
+                viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        Toast.makeText(getContext(), "ayy this is a long hold", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                });
                 viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -245,6 +252,15 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
                 tvFlashcardQuestion.setVisibility(View.GONE);
                 tvFlashcardQuestion.setText("");
                 linearLayout.removeAllViewsInLayout();
+               /*
+                    ALSO LIKE IF YOU WANT YOUR ANSWER TO BE ANONYMOUS YOU CHECK THE BOX AND YOUR ANSWER GETS SENT OFF
+                    OBVIOUSLY IF IT CANT FIND YOUR ANSWER IT'LL GIVE YOU THE OPTION TO STRAIGHT UP MAKE ONE'
+
+                    WITH ANONYMOUS IN FRONT OF IT SO ANONYMOUSJIAHALL
+                    THEN A STRING CHECKS IF IT HAS ANONYMOUS IN FRONT OF IT IF IT DOES IT GETS REMOVED SO YOU CAN EDIT IT
+                    BUT TO EVERYBODYT ELSE IT GETS RID OF YOUR USERNAME AND LEAVES ANONAMOUS
+                    AFTER THATS DONE AFTER THAT YOU'LL BE FINISHED WITH FLASH CARD COPY AND PASTE AND GET RID OF ALL FUNCTIONALITY FOR
+            QUIZ THATS BASICALLY IT THEN YOU GOTTA DO CALENDER/MOVE TO NOTES AND BAN USER THEN CLEAN UP AND YOUY'RE DONE*/
                 break;
         }
     }
