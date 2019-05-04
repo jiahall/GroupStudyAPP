@@ -17,21 +17,31 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
-            android:id="@+id/questionName"
-            android:textColor="#616161"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_margin="10dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
             android:id="@+id/questionOwner"
             android:textSize="15sp"
             android:textStyle="italic"
             android:layout_marginStart="10dp"
             android:layout_marginLeft="10dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:id="@+id/questionName"
+            android:textColor="#616161"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_margin="10dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:id="@+id/questionAnswer"
+            android:textColor="#616161"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_margin="10dp"
+            android:visibility="gone" />
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -43,11 +53,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Delete"
-                android:id="@+id/deleteFlashCard"
+                android:id="@+id/deleteQuiz"
                 android:visibility="invisible"
                 android:layout_margin="5dp"
                 android:background="@drawable/btnstyle" />
 
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Show answer"
+                android:id="@+id/showAnswerQuiz"
+                android:visibility="visible"
+                android:layout_margin="5dp"
+
+                android:background="@drawable/btnstyle" />
         </LinearLayout>
 
     </LinearLayout>

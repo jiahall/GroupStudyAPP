@@ -8,43 +8,13 @@
 
 
     <Button
-        android:id="@+id/btnOpenFlashDialog"
+        android:id="@+id/btnOpenQuizDialog"
         style="@style/Widget.AppCompat.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New flashcard"
+        android:text="New Question"
         android:background="@drawable/btnstyle"
         android:layout_margin="5dp" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btnOpenFlashList"
-        android:text="Close FlashCard"
-        android:background="@drawable/btnstyle"
-        android:visibility="gone" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/tvFlashcardQuestion"
-        android:visibility="gone" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/tvFlashcardOwner"
-        android:visibility="gone" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/answersLayout"
-        android:visibility="gone"
-        android:orientation="vertical">
-
-    </LinearLayout>
-
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -53,7 +23,7 @@
         android:orientation="vertical">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/flashcardRecyclerView"
+            android:id="@+id/quizRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 

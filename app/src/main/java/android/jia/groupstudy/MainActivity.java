@@ -72,8 +72,6 @@ public class MainActivity extends AppCompatActivity {
 
         PageAdapter pageAdapter = new PageAdapter(getSupportFragmentManager());
         pageAdapter.AddFragment(new RoomFragment(), "Room");
-        pageAdapter.AddFragment(new QuizFragment(), "Quiz");
-        pageAdapter.AddFragment(new FlashCardFragment(), "FlashCard");
         viewPager.setAdapter(pageAdapter);
         tabLayout.setupWithViewPager(viewPager);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));

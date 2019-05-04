@@ -1,5 +1,6 @@
 package android.jia.groupstudy;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +24,7 @@ import android.widget.Toast;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.firebase.ui.database.SnapshotParser;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,6 +37,7 @@ import com.google.firebase.database.ValueEventListener;
 public class FlashCardFragment extends Fragment implements View.OnClickListener, FlashCardDialogFragment.OnInputSelected {
 
     private static String TAG = "FlashCardFragment";
+
 
     @Override
     public void sendInput(String input, boolean anonymous) {
@@ -55,17 +60,21 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
         }
     }
 
-
     Button btnOpenFlashList;
     String roomId;
     private View view;
-    Button btnOpenFlashDialog;
-    public TextView tvFlashcardQuestion, tvFlashcardOwner;
+    Button btnOpenFlashDialog, btnSendAnswer;
+    public TextView tvFlashcardQuestion, tvFlashcardOwner, tvSetAnon;
+    public EditText etFlastcardAnswer;
+    public CheckBox cbSetAnon;
+    public String mUsername;
+
     public EnteredActivity value;
     public DatabaseReference mkFlashcard;
     public DatabaseReference findFlashcard;
     final FirebaseDatabase database = FirebaseDatabase.getInstance();
-    public FirebaseUser firebaseUser;
+    public FirebaseUser mFirebaseUser;
+    public FirebaseAuth mFirebaseAuth;
     private FirebaseRecyclerAdapter<Flashcard, FlashcardViewHolder>
             mFirebaseAdapter;
 
@@ -80,11 +89,38 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        // Initialize Firebase Auth
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+        if (mFirebaseUser == null) {
+            // Not signed in, launch the Sign In activity
+            Log.i(TAG, "you got kicked out of chat activity");
+            startActivity(new Intent(getActivity(), SignInActivity.class));
+            getActivity().finish();
+            return;
+        } else {
+            mUsername = mFirebaseUser.getDisplayName();
+
+            Toast.makeText(getActivity(), "you are: " + mFirebaseUser.getDisplayName() + " in Room: " + roomId + "quiz fragment", Toast.LENGTH_SHORT).show();
+
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
         view = inflater.inflate(R.layout.fragment_flash_card, container, false);
+
+        btnSendAnswer = view.findViewById(R.id.btnsendFlashcardAnswer);
+        tvSetAnon = view.findViewById(R.id.setAnswerAnon);
+        etFlastcardAnswer = view.findViewById(R.id.answerInput);
+        cbSetAnon = view.findViewById(R.id.setAnon);
+
+
         btnOpenFlashDialog = view.findViewById(R.id.btnOpenFlashDialog);
         btnOpenFlashDialog.setOnClickListener(this);
         btnOpenFlashList = view.findViewById(R.id.btnOpenFlashList);
@@ -93,7 +129,6 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
         roomId = value.roomId;
         mkFlashcard = database.getReference("flashcard");
         findFlashcard = database.getReference("flashcard/" + roomId);
-        firebaseUser = value.mFirebaseUser;
         checkFlash = database.getReference("flashcard");
 
         linearLayout = view.findViewById(R.id.answersLayout);
@@ -160,6 +195,11 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
                         tvFlashcardQuestion.setVisibility(View.VISIBLE);
                         tvFlashcardQuestion.setText(flashcard.getQuestion());
 
+                        btnSendAnswer.setVisibility(View.VISIBLE);
+                        tvSetAnon.setVisibility(View.VISIBLE);
+                        etFlastcardAnswer.setVisibility(View.VISIBLE);
+                        cbSetAnon.setVisibility(View.VISIBLE);
+
 
                         Query bont = checkFlash.child("djdj/Ftff").orderByKey();
                         bont.addValueEventListener(new ValueEventListener() {
@@ -171,7 +211,6 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
                                         textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                                         textView.setGravity(Gravity.CENTER);
                                         textView.setText(postSnapshot.getKey() + ": " + postSnapshot.getValue());
-                                        textView.setTag("12");
                                         linearLayout.addView(textView);
                                         Log.i(TAG, "The key is " + postSnapshot.getKey() + " it's value is: " + postSnapshot.getValue());
                                     }
@@ -189,7 +228,7 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
                     }
                 });
 
-                if (flashcard.getUser().equals(firebaseUser.getDisplayName())) {
+                if (flashcard.getUser().equals(mFirebaseUser.getDisplayName())) {
                     viewHolder.deleteButton.setVisibility(View.VISIBLE);
                     viewHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -218,6 +257,7 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
 
         return view;
     }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -252,6 +292,10 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
                 tvFlashcardQuestion.setVisibility(View.GONE);
                 tvFlashcardQuestion.setText("");
                 linearLayout.removeAllViewsInLayout();
+                btnSendAnswer.setVisibility(View.GONE);
+                tvSetAnon.setVisibility(View.GONE);
+                etFlastcardAnswer.setVisibility(View.GONE);
+                cbSetAnon.setVisibility(View.GONE);
                /*
                     ALSO LIKE IF YOU WANT YOUR ANSWER TO BE ANONYMOUS YOU CHECK THE BOX AND YOUR ANSWER GETS SENT OFF
                     OBVIOUSLY IF IT CANT FIND YOUR ANSWER IT'LL GIVE YOU THE OPTION TO STRAIGHT UP MAKE ONE'
@@ -269,7 +313,7 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
         Flashcard flashcard = new Flashcard();
         flashcard.setQuestion(input);
         flashcard.setAnonymous(anonymous);
-        flashcard.setUser(firebaseUser.getDisplayName());
+        flashcard.setUser(mFirebaseUser.getDisplayName());
         mkFlashcard.child(roomId).child(input).setValue(flashcard);
     }
 

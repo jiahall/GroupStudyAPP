@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -20,34 +19,31 @@ import android.widget.Toast;
  */
 public class QuizDialogFragment extends DialogFragment implements View.OnClickListener {
 
-    private static final String TAG = "FlashCardDialogFragment";
+    private static final String TAG = "QuizDialogFragment";
 
-    public interface OnInputSelected {
-        void sendInput(String input, boolean anonymous);
+    public interface OnQuestion {
+        void sendInput(String question, String answer);
     }
 
-    public FlashCardDialogFragment.OnInputSelected mOnInputSelected;
+    public QuizDialogFragment.OnQuestion mOnInputSelected;
 
 
-    public EditText mInput;
+    public EditText mQuestion, mAnswer;
     Button mActionOK, getmActionCancel;
-    public CheckBox setAnon;
-    boolean anonymous;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_flash_card_dialog, container, false);
+        View view = inflater.inflate(R.layout.fragment_quiz_dialog, container, false);
 
-        mInput = view.findViewById(R.id.mInput);
+        mQuestion = view.findViewById(R.id.mQuestion);
+        mAnswer = view.findViewById(R.id.mAnswer);
         mActionOK = view.findViewById(R.id.mActionOK);
         mActionOK.setOnClickListener(this);
         getmActionCancel = view.findViewById(R.id.getmActionCancel);
         getmActionCancel.setOnClickListener(this);
-        setAnon = view.findViewById(R.id.setAnon);
-
-
         return view;
     }
 
@@ -56,7 +52,7 @@ public class QuizDialogFragment extends DialogFragment implements View.OnClickLi
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
-            mOnInputSelected = (FlashCardDialogFragment.OnInputSelected) getTargetFragment();
+            mOnInputSelected = (QuizDialogFragment.OnQuestion) getTargetFragment();
         } catch (ClassCastException e) {
             Log.e(TAG, "onAttach: ClassCaseException: " + e.getMessage());
         }
@@ -67,13 +63,11 @@ public class QuizDialogFragment extends DialogFragment implements View.OnClickLi
         switch (view.getId()) {
             case R.id.mActionOK:
                 Log.i(TAG, "pressed send");
-                if (setAnon.isChecked()) {
-                    anonymous = true;
-                }
-                String input = mInput.getText().toString();
-                if ((input.trim().length() >= 4)) {
+                String question = mQuestion.getText().toString();
+                String answer = mAnswer.getText().toString();
+                if ((question.trim().length() >= 4 && answer.trim().length() >= 4)) {
 
-                    mOnInputSelected.sendInput(input, anonymous);
+                    mOnInputSelected.sendInput(question, answer);
                     getDialog().dismiss();
                 } else {
                     Toast.makeText(getActivity(), "Please input at least 4 characters in both fields", Toast.LENGTH_SHORT).show();

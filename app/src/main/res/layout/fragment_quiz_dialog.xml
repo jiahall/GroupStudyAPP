@@ -4,33 +4,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".FlashCardDialogFragment">
+    tools:context=".QuizDialogFragment">
 
-    <!-- TODO: Update blank fragment layout -->
 
     <EditText
-        android:id="@+id/mInput"
+        android:id="@+id/mQuestion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        android:hint="Enter question" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <EditText
+        android:id="@+id/mAnswer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:inputType="textPersonName"
+        android:hint="Enter answer" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Set To Anonymous" />
-
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/setAnon" />
-
-
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
