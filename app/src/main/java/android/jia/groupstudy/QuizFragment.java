@@ -2,6 +2,7 @@ package android.jia.groupstudy;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,8 +23,11 @@ import com.firebase.ui.database.SnapshotParser;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 
 public class QuizFragment extends Fragment implements View.OnClickListener, QuizDialogFragment.OnQuestion {
@@ -60,10 +64,11 @@ public class QuizFragment extends Fragment implements View.OnClickListener, Quiz
     private FirebaseAuth mFirebaseAuth;
     String roomId;
     private View view;
-    Button btnOpenQuizDialog;
+    Button btnOpenQuizDialog, btnExportQuiz;
     public EnteredActivity value;
     public DatabaseReference mkQuiz;
     public DatabaseReference findQuiz;
+    public DatabaseReference exportQuiz;
     final FirebaseDatabase database = FirebaseDatabase.getInstance();
     public FirebaseUser mFirebaseUser;
     private FirebaseRecyclerAdapter<Quiz, QuizFragment.QuizViewHolder>
@@ -72,6 +77,11 @@ public class QuizFragment extends Fragment implements View.OnClickListener, Quiz
     private DatabaseReference checkQuiz;
     private RecyclerView mQuizRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
+
+    String key, flump;
+    String dip = "";
+    long num;
+    int count = 0;
 
     public QuizFragment() {
         // Required empty public constructor
@@ -95,6 +105,7 @@ public class QuizFragment extends Fragment implements View.OnClickListener, Quiz
             Toast.makeText(getActivity(), "you are: " + mFirebaseUser.getDisplayName() + " in Room: " + roomId + "quiz fragment", Toast.LENGTH_SHORT).show();
 
         }
+        flump = "";
     }
 
     @Override
@@ -105,11 +116,14 @@ public class QuizFragment extends Fragment implements View.OnClickListener, Quiz
         view = inflater.inflate(R.layout.fragment_quiz, container, false);
         btnOpenQuizDialog = view.findViewById(R.id.btnOpenQuizDialog);
         btnOpenQuizDialog.setOnClickListener(this);
+        btnExportQuiz = view.findViewById(R.id.btnExportQuiz);
+        btnExportQuiz.setOnClickListener(this);
         value = (EnteredActivity) getActivity();
         roomId = value.roomId;
         mkQuiz = database.getReference("quiz");
         findQuiz = database.getReference("quiz/" + roomId);
         checkQuiz = database.getReference("quiz");
+        exportQuiz = database.getReference();
 
 
         mQuizRecyclerView = (RecyclerView) view.findViewById(R.id.quizRecyclerView);
@@ -182,6 +196,7 @@ public class QuizFragment extends Fragment implements View.OnClickListener, Quiz
         mFirebaseAdapter.startListening();
 
 
+
         return view;
     }
 
@@ -208,8 +223,85 @@ public class QuizFragment extends Fragment implements View.OnClickListener, Quiz
                 dialog.setTargetFragment(QuizFragment.this, 1);
                 dialog.show(getFragmentManager(), "QuizDialogFragment");
                 break;
+            case R.id.btnExportQuiz:
+                readData(new FirebaseCallback() {
+                    @Override
+                    public void onCallBack(String flump) {
+                        dip = "";
+                        dip += flump;
+                        count++;
+                        if (count == num) {
+                            Log.i(TAG, dip);
+                            Intent sendIntent = new Intent();
+                            sendIntent.setAction(Intent.ACTION_SEND);
+                            sendIntent.putExtra(Intent.EXTRA_TEXT, dip);
+                            sendIntent.setType("text/plain");
+                            startActivity(Intent.createChooser(sendIntent, "send to"));
+                        }
+
+
+                    }
+
+                    @Override
+                    public void onCallBack(long doo) {
+
+                        num = doo;
+
+                    }
+                });
 
         }
+    }
+
+    private void readData(final FirebaseCallback firebaseCallback) {
+        exportQuiz.child("quiz/" + roomId).orderByKey().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (final DataSnapshot child : dataSnapshot.getChildren()) {
+                    key = child.getKey();
+
+
+                    firebaseCallback.onCallBack(dataSnapshot.getChildrenCount());
+
+
+                    System.out.println("checking" + key);
+                    Query bont = exportQuiz.child("quiz/" + roomId + "/" + key);
+                    bont.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            flump += "\n" + "Question: " + dataSnapshot.child("question").getValue();
+                            flump += "\n" + "Answer: " + dataSnapshot.child("answer").getValue();
+                            flump += "\n" + "User: " + dataSnapshot.child("user").getValue();
+                            flump += "\n";
+                            flump += "\n";
+                            firebaseCallback.onCallBack(flump);
+
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private interface FirebaseCallback {
+
+        void onCallBack(String flump);
+
+        void onCallBack(long num);
+
     }
 
     private void makeQuiz(String question, String answer) {

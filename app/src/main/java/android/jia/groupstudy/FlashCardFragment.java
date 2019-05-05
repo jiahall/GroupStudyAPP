@@ -60,18 +60,24 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
         }
     }
 
+    String key, flump;
+    String dip = "";
+    long num;
+    int count = 0;
+
     Button btnOpenFlashList;
     String roomId;
     private View view;
-    Button btnOpenFlashDialog, btnSendAnswer;
+    Button btnOpenFlashDialog, btnSendAnswer, btnExportFlashcard;
     public TextView tvFlashcardQuestion, tvFlashcardOwner, tvSetAnon;
-    public EditText etFlastcardAnswer;
+    public EditText etFlashcardAnswer;
     public CheckBox cbSetAnon;
-    public String mUsername;
+    public String mUsername, anonInputCheck;
 
     public EnteredActivity value;
     public DatabaseReference mkFlashcard;
     public DatabaseReference findFlashcard;
+    public DatabaseReference exportFlashcard;
     final FirebaseDatabase database = FirebaseDatabase.getInstance();
     public FirebaseUser mFirebaseUser;
     public FirebaseAuth mFirebaseAuth;
@@ -117,16 +123,21 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
 
         btnSendAnswer = view.findViewById(R.id.btnsendFlashcardAnswer);
         tvSetAnon = view.findViewById(R.id.setAnswerAnon);
-        etFlastcardAnswer = view.findViewById(R.id.answerInput);
+        etFlashcardAnswer = view.findViewById(R.id.answerInput);
         cbSetAnon = view.findViewById(R.id.setAnon);
 
+        flump = "";
 
+        anonInputCheck = "an17on";
         btnOpenFlashDialog = view.findViewById(R.id.btnOpenFlashDialog);
         btnOpenFlashDialog.setOnClickListener(this);
         btnOpenFlashList = view.findViewById(R.id.btnOpenFlashList);
         btnOpenFlashList.setOnClickListener(this);
+        btnExportFlashcard = view.findViewById(R.id.btnExportFlashcard);
+        btnExportFlashcard.setOnClickListener(this);
         value = (EnteredActivity) getActivity();
         roomId = value.roomId;
+        exportFlashcard = database.getReference();
         mkFlashcard = database.getReference("flashcard");
         findFlashcard = database.getReference("flashcard/" + roomId);
         checkFlash = database.getReference("flashcard");
@@ -196,23 +207,75 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
                         tvFlashcardQuestion.setText(flashcard.getQuestion());
 
                         btnSendAnswer.setVisibility(View.VISIBLE);
+                        btnSendAnswer.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (etFlashcardAnswer.length() >= 1) {
+                                    if (cbSetAnon.isChecked()) {
+                                        checkFlash.child(roomId + "/" + flashcard.getQuestion() + "/" + mFirebaseUser.getDisplayName()).setValue(anonInputCheck + etFlashcardAnswer.getText().toString());
+                                    } else {
+                                        checkFlash.child(roomId + "/" + flashcard.getQuestion() + "/" + mFirebaseUser.getDisplayName()).setValue(etFlashcardAnswer.getText().toString());
+                                    }
+                                } else {
+                                    Toast.makeText(getContext(), "please input 1 or more characters", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+
                         tvSetAnon.setVisibility(View.VISIBLE);
-                        etFlastcardAnswer.setVisibility(View.VISIBLE);
+                        etFlashcardAnswer.setVisibility(View.VISIBLE);
                         cbSetAnon.setVisibility(View.VISIBLE);
 
 
-                        Query bont = checkFlash.child("djdj/Ftff").orderByKey();
+                        Query bont = checkFlash.child(roomId + "/" + flashcard.getQuestion()).orderByKey();
                         bont.addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                linearLayout.removeAllViewsInLayout();
                                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                    if (!postSnapshot.getKey().equals("question") && !postSnapshot.getKey().equals("anonymous")) {
+                                    //in this case the key is the username and the value their answer
+                                    if (!postSnapshot.getKey().equals("question") && !postSnapshot.getKey().equals("anonymous") && !postSnapshot.getKey().equals("user")) {
                                         TextView textView = new TextView(getContext());
                                         textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                                         textView.setGravity(Gravity.CENTER);
-                                        textView.setText(postSnapshot.getKey() + ": " + postSnapshot.getValue());
+
+                                        String firstSixChars = postSnapshot.getValue().toString();
+                                        if (firstSixChars.length() > 6) {
+
+                                            String amount = firstSixChars.substring(0, 6);
+                                            Log.i(TAG, "First 6 characters: " + amount);
+                                            if (amount.equals(anonInputCheck)) {
+                                                textView.setText("anonymous: " + firstSixChars.substring(6));
+                                            } else {
+                                                //if the value is above the subString but does not start with an17on it's not meant to be anonymous
+                                                textView.setText(postSnapshot.getKey() + ": " + postSnapshot.getValue());
+                                            }
+                                        } else {
+                                            //if the value is below the substring amount, it cannot be anonamous
+                                            textView.setText(postSnapshot.getKey() + ": " + postSnapshot.getValue());
+                                        }
+
+
+
                                         linearLayout.addView(textView);
-                                        Log.i(TAG, "The key is " + postSnapshot.getKey() + " it's value is: " + postSnapshot.getValue());
+                                        /*Log.i(TAG, "The key is " + postSnapshot.getKey() + " it's value is: " + postSnapshot.getValue());*/
+                                        if (postSnapshot.getKey().equals(mFirebaseUser.getDisplayName())) {
+                                            if (firstSixChars.length() > 6) {
+
+                                                String amount = firstSixChars.substring(0, 6);
+                                                Log.i(TAG, "First 6 characters: " + amount);
+                                                if (amount.equals(anonInputCheck)) {
+                                                    etFlashcardAnswer.setText(firstSixChars.substring(6));
+                                                } else {
+                                                    //if the value is above the subString but does not start with an17on it's not meant to be anonymous
+                                                    etFlashcardAnswer.setText(postSnapshot.getValue().toString());
+                                                }
+                                            } else {
+                                                //if the value is below the substring amount, it cannot be anonamous
+                                                etFlashcardAnswer.setText(postSnapshot.getValue().toString());
+                                            }
+
+                                        }
                                     }
 
                                 }
@@ -294,18 +357,41 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
                 linearLayout.removeAllViewsInLayout();
                 btnSendAnswer.setVisibility(View.GONE);
                 tvSetAnon.setVisibility(View.GONE);
-                etFlastcardAnswer.setVisibility(View.GONE);
+                etFlashcardAnswer.setVisibility(View.GONE);
+                etFlashcardAnswer.setText("");
                 cbSetAnon.setVisibility(View.GONE);
-               /*
-                    ALSO LIKE IF YOU WANT YOUR ANSWER TO BE ANONYMOUS YOU CHECK THE BOX AND YOUR ANSWER GETS SENT OFF
-                    OBVIOUSLY IF IT CANT FIND YOUR ANSWER IT'LL GIVE YOU THE OPTION TO STRAIGHT UP MAKE ONE'
-
-                    WITH ANONYMOUS IN FRONT OF IT SO ANONYMOUSJIAHALL
-                    THEN A STRING CHECKS IF IT HAS ANONYMOUS IN FRONT OF IT IF IT DOES IT GETS REMOVED SO YOU CAN EDIT IT
-                    BUT TO EVERYBODYT ELSE IT GETS RID OF YOUR USERNAME AND LEAVES ANONAMOUS
-                    AFTER THATS DONE AFTER THAT YOU'LL BE FINISHED WITH FLASH CARD COPY AND PASTE AND GET RID OF ALL FUNCTIONALITY FOR
-            QUIZ THATS BASICALLY IT THEN YOU GOTTA DO CALENDER/MOVE TO NOTES AND BAN USER THEN CLEAN UP AND YOUY'RE DONE*/
                 break;
+            case R.id.btnExportFlashcard:
+                Log.i(TAG, "well the button was pressed");
+                readData(new FirebaseCallback() {
+                    @Override
+                    public void onCallBack(String flump) {
+                        dip = "";
+                        dip += flump;
+                        count++;
+                        if (count == num) {
+                            Log.i(TAG, dip);
+                            Intent sendIntent = new Intent();
+                            sendIntent.setAction(Intent.ACTION_SEND);
+                            sendIntent.putExtra(Intent.EXTRA_TEXT, dip);
+                            sendIntent.setType("text/plain");
+                            startActivity(Intent.createChooser(sendIntent, "send to"));
+                        }
+
+                        Log.i(TAG, "This should come in second? " + num);
+
+
+                    }
+
+                    @Override
+                    public void onCallBack(long doo) {
+
+                        num = doo;
+                        Log.i(TAG, "The number comes first? " + num);
+                    }
+                });
+                break;
+
         }
     }
 
@@ -315,6 +401,83 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
         flashcard.setAnonymous(anonymous);
         flashcard.setUser(mFirebaseUser.getDisplayName());
         mkFlashcard.child(roomId).child(input).setValue(flashcard);
+    }
+
+    private void readData(final FirebaseCallback firebaseCallback) {
+        exportFlashcard.child("flashcard/" + roomId).orderByKey().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (final DataSnapshot child : dataSnapshot.getChildren()) {
+                    key = child.getKey();
+
+
+                    firebaseCallback.onCallBack(dataSnapshot.getChildrenCount());
+
+
+                    System.out.println("checking" + key);
+                    Query bont = exportFlashcard.child("flashcard/" + roomId + "/" + key);
+                    bont.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            flump += "\n" + "Question: " + dataSnapshot.child("question").getValue();
+
+                            if (dataSnapshot.child("anonymous").getValue().equals(true)) {
+                                flump += "\n" + "User wishes to remain anonymous";
+                            } else {
+                                flump += "\n" + "User: " + dataSnapshot.child("user").getValue();
+                            }
+
+                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                if (!postSnapshot.getKey().equals("question") && !postSnapshot.getKey().equals("anonymous") && !postSnapshot.getKey().equals("user")) {
+                                    String firstSixChars = postSnapshot.getValue().toString();
+                                    if (firstSixChars.length() > 6) {
+
+                                        String amount = firstSixChars.substring(0, 6);
+
+                                        if (amount.equals("an17on")) {
+
+                                            flump += "\n" + "Anonymous: " + firstSixChars.substring(6);
+                                        } else {
+                                            //if the value is above the subString but does not start with an17on it's not meant to be anonymous
+                                            flump += "\n" + postSnapshot.getKey() + ": " + postSnapshot.getValue();
+                                        }
+                                    } else {
+                                        //if the value is below the substring amount, it cannot be anonamous
+                                        flump += "\n" + postSnapshot.getKey() + ": " + postSnapshot.getValue();
+                                    }
+
+                                }
+                            }
+                            flump += "\n";
+                            flump += "\n";
+                            firebaseCallback.onCallBack(flump);
+
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private interface FirebaseCallback {
+
+        void onCallBack(String flump);
+
+        void onCallBack(long num);
+
     }
 
 }

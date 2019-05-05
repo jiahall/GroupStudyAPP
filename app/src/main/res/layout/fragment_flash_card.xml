@@ -6,7 +6,9 @@
     android:orientation="vertical"
     tools:context=".FlashCardFragment">
 
-
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
     <Button
         android:id="@+id/btnOpenFlashDialog"
         style="@style/Widget.AppCompat.Button"
@@ -24,16 +26,30 @@
         android:background="@drawable/btnstyle"
         android:visibility="gone" />
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnExportFlashcard"
+            android:text="Export flashCard"
+            android:background="@drawable/btnstyle"
+            android:layout_margin="5dp" />
+    </LinearLayout>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tvFlashcardQuestion"
+        android:textColor="#616161"
+        android:textSize="18sp"
+        android:textStyle="bold"
         android:visibility="gone" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tvFlashcardOwner"
+        android:textColor="#616161"
+        android:textSize="14sp"
+        android:textStyle="bold"
         android:visibility="gone" />
 
     <LinearLayout

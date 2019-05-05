@@ -23,6 +23,7 @@ import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -56,7 +57,9 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
     DatabaseReference inputUser;
     DatabaseReference checkUser;
     DatabaseReference roomRef;
-    private DatabaseReference userRef;
+    public FirebaseUser mFirebaseUser;
+    public FirebaseAuth mFirebaseAuth;
+
     Boolean isBanned;
     FirebaseRecyclerAdapter<Room, RoomViewHolder> adapter;
     String roomID;
@@ -80,7 +83,6 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
         view = inflater.inflate(R.layout.fragment_room, container, false);
 
         value = (MainActivity) getActivity();
-        firebaseUserRoom = value.mFirebaseUser;
         testUid = value.uId;
 
         inputUser = database.getReference();
@@ -90,7 +92,7 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
         roomRef = database.getReference().child("room");
 
 
-        userRef = database.getReference().child("user").child(firebaseUserRoom.getUid()).child("member");
+
 
 
         btnRoomMaker = view.findViewById(R.id.btnRoomMaker);
@@ -109,8 +111,18 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
     @Override
     public void onStart() {
         super.onStart();
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+        if (mFirebaseUser == null) {
+            // Not signed in, launch the Sign In activity
+            Log.i(TAG, "you got kicked out of chat activity");
+            startActivity(new Intent(getActivity(), SignInActivity.class));
+            getActivity().finish();
+            return;
+        }
+
         FirebaseRecyclerOptions<Room> options = new FirebaseRecyclerOptions.Builder<Room>()
-                .setQuery(findRoom.child(firebaseUserRoom.getUid()), Room.class).build();
+                .setQuery(findRoom.child(mFirebaseUser.getUid()), Room.class).build();
 
         adapter = new FirebaseRecyclerAdapter<Room, RoomViewHolder>(options) {
             @Override
@@ -136,12 +148,12 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
                                         Log.i(TAG, "data i got is: " + requestRoomOwner);
                                         final String requestOwnerUid = dataSnapshot.child("ownerUid").getValue().toString();
                                         Log.i(TAG, "Data for uid u got is: " + requestOwnerUid);
-                                        Log.i(TAG, "Data for uid u got is: " + firebaseUserRoom.getUid());
+                                        Log.i(TAG, "Data for uid u got is: " + mFirebaseUser.getUid());
 
 
                                         holder.roomOwner.setText(requestRoomOwner);
                                         holder.roomName.setText(requestRoomName);
-                                        if (firebaseUserRoom.getUid().equals(requestOwnerUid)) {
+                                        if (mFirebaseUser.getUid().equals(requestOwnerUid)) {
                                             //set buttons depending on if room owner or not
                                             holder.deleteRoom.setVisibility(View.VISIBLE);
                                             holder.leaveRoom.setVisibility(View.GONE);
@@ -156,7 +168,7 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
                                             @Override
                                             public void onClick(View view) {
                                                 Toast.makeText(getActivity(), "you just left: " + holder.roomName.getText().toString(), Toast.LENGTH_SHORT).show();
-                                                inputUser.child("member/" + firebaseUserRoom.getUid() + "/" + holder.roomName.getText().toString()).setValue(null);
+                                                inputUser.child("member/" + mFirebaseUser.getUid() + "/" + holder.roomName.getText().toString()).setValue(null);
                                             }
                                         });
                                         holder.deleteRoom.setOnClickListener(new View.OnClickListener() {
@@ -166,6 +178,9 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
                                                 getRef(position).removeValue();
                                                 inputUser.child("room/" + holder.roomName.getText().toString()).removeValue();
                                                 inputUser.child("messages/" + holder.roomName.getText().toString()).removeValue();
+                                                inputUser.child("flashcard/" + holder.roomName.getText().toString()).removeValue();
+                                                inputUser.child("quiz/" + holder.roomName.getText().toString()).removeValue();
+                                                //GOTTA GET RID OF EVERYBODY MEMBERSHIT TO THIS ROOM, BANNED OR NOT
 
                                             }
                                         });
@@ -299,7 +314,7 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
 
     private void addUser(final String roomName) {
         Log.i(TAG, "well we're in the method");
-        inputUser.child("member/" + firebaseUserRoom.getUid() + "/" + roomName + "/status").addListenerForSingleValueEvent(new ValueEventListener() {
+        inputUser.child("member/" + mFirebaseUser.getUid() + "/" + roomName + "/status").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot data) {
                 Log.i(TAG, "getting data: " + data.toString());
@@ -312,7 +327,7 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
                     }
 
                 } else {
-                    inputUser.child("member/" + firebaseUserRoom.getUid() + "/" + roomName).child("status").setValue("member");
+                    inputUser.child("member/" + mFirebaseUser.getUid() + "/" + roomName).child("status").setValue("member");
                 }
             }
 
@@ -332,16 +347,16 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
                 } else {
                     Room room;
                     room = new Room();
-                    room.setOwnerDisplayName(firebaseUserRoom.getDisplayName());
+                    room.setOwnerDisplayName(mFirebaseUser.getDisplayName());
                     room.setColor("testBlue");
-                    room.setOwnerUid(firebaseUserRoom.getUid());
+                    room.setOwnerUid(mFirebaseUser.getUid());
                     room.setPassword(password);
 
                     mkRoom.child("room").child(roomName).setValue(room).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
                             Toast.makeText(getActivity(), "Room Created", Toast.LENGTH_SHORT).show();
-                            inputUser.child("member/" + firebaseUserRoom.getUid() + "/" + roomName).child("status").setValue("member");
+                            inputUser.child("member/" + mFirebaseUser.getUid() + "/" + roomName).child("status").setValue("member");
 
 
                         }

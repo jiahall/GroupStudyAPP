@@ -30,10 +30,14 @@ public class MainActivity extends AppCompatActivity {
     FirebaseUser mFirebaseUser;
     private String mUsername;
     private String mPhotoUrl;
-    String key;
+
+/*    String key, flump;
+    String dip = "";
+    long num;
+    int count= 0;*/
+
 
     String uId;
-
     String fragPass;
     DatabaseReference test;
     final FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -58,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
         checkFlash = database.getReference();
 
 
+        /*flump ="";*/
         test = FirebaseDatabase.getInstance().getReference()
                 .child("user");
         fragPass = "it works";
@@ -113,7 +118,115 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+
+
+
+/*        readData(new FirebaseCallback() {
+            @Override
+            public void onCallBack(String flump) {
+                dip = "";
+                dip += flump;
+                count++;
+                if(count==num){
+                    Log.i(TAG,dip);
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, dip);
+                    sendIntent.setType("text/plain");
+                    startActivity(Intent.createChooser(sendIntent, "send to"));
+                }
+
+                Log.i(TAG,"This should come in second? " +num);
+
+
+            }
+            @Override
+            public void onCallBack(long doo) {
+
+                num= doo;
+                Log.i(TAG,"The number comes first? "+ num);
+            }
+        });*/
+
+
+
     }
+/*    private void readData(final FirebaseCallback firebaseCallback){
+        checkFlash.child("flashcard/djdj").orderByKey().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (final DataSnapshot child : dataSnapshot.getChildren()){
+                    key = child.getKey();
+
+
+                    firebaseCallback.onCallBack(dataSnapshot.getChildrenCount());
+
+
+                    System.out.println("checking" + key);
+                    Query bont = checkMem.child("flashcard/djdj/"+ key);
+                    bont.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            flump += "\n"+ "Question: " + dataSnapshot.child("question").getValue();
+
+                            if(dataSnapshot.child("anonymous").getValue().equals(true)){
+                                flump += "\n"+ "User wishes to remain anonymous";
+                            }else{
+                                flump += "\n"+ "User: " + dataSnapshot.child("user").getValue();
+                            }
+
+                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                if (!postSnapshot.getKey().equals("question") && !postSnapshot.getKey().equals("anonymous") && !postSnapshot.getKey().equals("user")){
+                                    String firstSixChars = postSnapshot.getValue().toString();
+                                    if (firstSixChars.length() > 6) {
+
+                                        String amount = firstSixChars.substring(0, 6);
+
+                                        if(amount.equals("an17on")){
+
+                                            flump += "\n"+ "Anonymous: " + firstSixChars.substring(6);
+                                        }else{
+                                            //if the value is above the subString but does not start with an17on it's not meant to be anonymous
+                                            flump += "\n"+ postSnapshot.getKey()+ ": " + postSnapshot.getValue();
+                                        }
+                                    }else{
+                                        //if the value is below the substring amount, it cannot be anonamous
+                                        flump += "\n"+ postSnapshot.getKey()+ ": " + postSnapshot.getValue();
+                                    }
+
+                            }
+                            }
+                            flump += "\n";
+                            flump += "\n";
+                            firebaseCallback.onCallBack(flump);
+
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        }*/
+
+
+   /* private interface FirebaseCallback{
+
+        void onCallBack(String flump);
+        void onCallBack(long num);
+
+    }*/
 
     @Override
     protected void onRestart() {
@@ -138,6 +251,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+
+
         // Initialize Firebase Auth
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
@@ -230,7 +345,8 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });*/
-           /* THIS WORKS GETS A MEMBER THEN FILDS ALL ROOMS THEIR IN isThere.child("Bipper/member").orderByKey().addValueEventListener(new ValueEventListener() {
+           /* THIS WORKS GETS A MEMBER THEN FILDS ALL ROOMS THEIR IN
+           isThere.child("Bipper/member").orderByKey().addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     for (final DataSnapshot child : dataSnapshot.getChildren()){
@@ -328,6 +444,52 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+
+
+
+
+/* checkFlash.child("flashcard/djdj").orderByKey().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (final DataSnapshot child : dataSnapshot.getChildren()){
+                    key = child.getKey();
+                    flump += "\n THE FLASH CARD QUESSTION IS: " +key+"--------";
+
+                    System.out.println("checking" + key);
+                    Query bont = checkMem.child("flashcard/djdj/"+ key);
+                    bont.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                flump += "\n"+ postSnapshot.getKey()+ " " + postSnapshot.getValue();
+                            }
+                            }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });Log.i(TAG, flump);
+                }Log.i(TAG, flump);
+            }
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+*/
+
+
+
+/*        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
+        sendIntent.setType("text/plain");
+        startActivity(Intent.createChooser(sendIntent, "send to"));*/
+
 
     public void RoomCheck() {
         Query query = checkMem.child("member/" + mFirebaseUser.getUid()).orderByKey();
