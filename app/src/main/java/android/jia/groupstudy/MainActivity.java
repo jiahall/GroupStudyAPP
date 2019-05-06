@@ -30,18 +30,10 @@ public class MainActivity extends AppCompatActivity {
     FirebaseUser mFirebaseUser;
     private String mUsername;
     private String mPhotoUrl;
-
-/*    String key, flump;
-    String dip = "";
-    long num;
-    int count= 0;*/
-
-
     String uId;
     String fragPass;
     DatabaseReference test;
     final FirebaseDatabase database = FirebaseDatabase.getInstance();
-    final DatabaseReference getTest = database.getReference("message");
     DatabaseReference mDataBase;
     DatabaseReference isThere;
     DatabaseReference checkMem;
@@ -119,114 +111,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
-
-
-/*        readData(new FirebaseCallback() {
-            @Override
-            public void onCallBack(String flump) {
-                dip = "";
-                dip += flump;
-                count++;
-                if(count==num){
-                    Log.i(TAG,dip);
-                    Intent sendIntent = new Intent();
-                    sendIntent.setAction(Intent.ACTION_SEND);
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, dip);
-                    sendIntent.setType("text/plain");
-                    startActivity(Intent.createChooser(sendIntent, "send to"));
-                }
-
-                Log.i(TAG,"This should come in second? " +num);
-
-
-            }
-            @Override
-            public void onCallBack(long doo) {
-
-                num= doo;
-                Log.i(TAG,"The number comes first? "+ num);
-            }
-        });*/
-
-
-
     }
-/*    private void readData(final FirebaseCallback firebaseCallback){
-        checkFlash.child("flashcard/djdj").orderByKey().addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (final DataSnapshot child : dataSnapshot.getChildren()){
-                    key = child.getKey();
 
-
-                    firebaseCallback.onCallBack(dataSnapshot.getChildrenCount());
-
-
-                    System.out.println("checking" + key);
-                    Query bont = checkMem.child("flashcard/djdj/"+ key);
-                    bont.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            flump += "\n"+ "Question: " + dataSnapshot.child("question").getValue();
-
-                            if(dataSnapshot.child("anonymous").getValue().equals(true)){
-                                flump += "\n"+ "User wishes to remain anonymous";
-                            }else{
-                                flump += "\n"+ "User: " + dataSnapshot.child("user").getValue();
-                            }
-
-                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                if (!postSnapshot.getKey().equals("question") && !postSnapshot.getKey().equals("anonymous") && !postSnapshot.getKey().equals("user")){
-                                    String firstSixChars = postSnapshot.getValue().toString();
-                                    if (firstSixChars.length() > 6) {
-
-                                        String amount = firstSixChars.substring(0, 6);
-
-                                        if(amount.equals("an17on")){
-
-                                            flump += "\n"+ "Anonymous: " + firstSixChars.substring(6);
-                                        }else{
-                                            //if the value is above the subString but does not start with an17on it's not meant to be anonymous
-                                            flump += "\n"+ postSnapshot.getKey()+ ": " + postSnapshot.getValue();
-                                        }
-                                    }else{
-                                        //if the value is below the substring amount, it cannot be anonamous
-                                        flump += "\n"+ postSnapshot.getKey()+ ": " + postSnapshot.getValue();
-                                    }
-
-                            }
-                            }
-                            flump += "\n";
-                            flump += "\n";
-                            firebaseCallback.onCallBack(flump);
-
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
-                }
-            }
-
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-        }*/
-
-
-   /* private interface FirebaseCallback{
-
-        void onCallBack(String flump);
-        void onCallBack(long num);
-
-    }*/
 
     @Override
     protected void onRestart() {
@@ -271,11 +157,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-
-
-
-            /*test.child("goffer").child("member").child("goony").setValue((true));*/
-
             //If there is not already a user in the database this will make them
             isThere.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -298,130 +179,12 @@ public class MainActivity extends AppCompatActivity {
             });
 
 
-
-            /*checkMem.child("member/" + mFirebaseUser.getUid() + "/test1/status").addListenerForSingleValueEvent(new ValueEventListener() {
-
-                @Override
-                public void onDataChange(@NonNull DataSnapshot data) {
-                    if (data.exists()) {
-                        Log.i(TAG, "the value we're getting is: " + data.getValue());
-                        String info = data.getValue().toString();
-                        if (info.equals("member")) {
-                            Log.i(TAG, "yeh he's good");
-
-                        } else if (info.equals("banned")) {
-                            Log.i(TAG, "yikes he a no go");
-
-                        }
-
-                    } else {
-                        Log.i(TAG, "nobody lives here captain");
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-
-            });*/
-
-
-
-
-
-
-
-/*            checkMem.child("room/aaaa").addListenerForSingleValueEvent(new ValueEventListener() {
+            checkMem.child("room/dogs").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()){
-                        System.out.println(dataSnapshot.getKey());
+                        Log.i(TAG, "yeh it's real" + dataSnapshot.getKey());
                     }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });*/
-           /* THIS WORKS GETS A MEMBER THEN FILDS ALL ROOMS THEIR IN
-           isThere.child("Bipper/member").orderByKey().addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    for (final DataSnapshot child : dataSnapshot.getChildren()){
-                         key = child.getKey();
-
-                        System.out.println("checking" + key);
-                        checkMem.child("room/"+key).addListenerForSingleValueEvent(new ValueEventListener() {
-                            String zoop = key;
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot data) {
-                                if (data.exists()){
-                                    System.out.println(data.getValue()+"is real");
-                                }
-                                else{
-                                    System.out.println(zoop +"is not real");
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });*/
-           
-
-           /*
-           GET ALL CHILDREN WITH KEY EQUAL TO BEEF= 12
-           */
-
-
-
-            /*isThere.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.hasChild("Bipper/member/boony")){
-                        System.out.println("yeh he's here");
-                    }
-                    else{
-                        System.out.println("yo where he at");
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });*/
-
-           /* mDataBase.orderByValue().addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String prevChildKey) {
-                    System.out.println("The " + dataSnapshot.getKey() + " score is " + dataSnapshot.getValue());
-                }
-
-                @Override
-                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
                 }
 
                 @Override
@@ -429,17 +192,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
-*/
 
-
-
-
-
-/*            userTst = new User();
-            userTst.setMember("hi");
-            userTst.setBanned("hello");
-            us
-            test.child("goffer").child("member").child("goony").setValue((true));*/
 
         }
 
@@ -449,46 +202,6 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-/* checkFlash.child("flashcard/djdj").orderByKey().addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (final DataSnapshot child : dataSnapshot.getChildren()){
-                    key = child.getKey();
-                    flump += "\n THE FLASH CARD QUESSTION IS: " +key+"--------";
-
-                    System.out.println("checking" + key);
-                    Query bont = checkMem.child("flashcard/djdj/"+ key);
-                    bont.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                flump += "\n"+ postSnapshot.getKey()+ " " + postSnapshot.getValue();
-                            }
-                            }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });Log.i(TAG, flump);
-                }Log.i(TAG, flump);
-            }
-
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-*/
-
-
-
-/*        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
-        sendIntent.setType("text/plain");
-        startActivity(Intent.createChooser(sendIntent, "send to"));*/
 
 
     public void RoomCheck() {

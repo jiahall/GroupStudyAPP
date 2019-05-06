@@ -32,7 +32,7 @@ public class EnteredActivity extends AppCompatActivity {
     DatabaseReference mDataBase;
     DatabaseReference isThere;
     DatabaseReference checkMem;
-    String roomId;
+    String roomId, roomCreator;
 
 
     User userTst;
@@ -42,9 +42,12 @@ public class EnteredActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mDataBase = database.getReference();
         roomId = getIntent().getStringExtra("ROOM_DATA");
+        roomCreator = getIntent().getStringExtra("ROOM_OWNER");
         Log.i(TAG, "the room id is: " + roomId);
         final Toolbar toolbar = findViewById(R.id.toolbar);
+        Log.i(TAG, "the guy who created the room is: " + roomCreator);
         toolbar.setTitle(getResources().getString(R.string.app_name));
         final TabLayout tabLayout = findViewById(R.id.tablayout);
 
@@ -97,6 +100,7 @@ public class EnteredActivity extends AppCompatActivity {
 
             }
         });
+
 
     }
 

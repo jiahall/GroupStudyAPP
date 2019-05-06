@@ -1,5 +1,7 @@
 package android.jia.groupstudy;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -36,10 +38,12 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -70,7 +74,7 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
 
-    private DatabaseReference mFirebaseDatabaseReference;
+    private DatabaseReference mFirebaseDatabaseReference, banUser;
     private FirebaseRecyclerAdapter<ChatMessage, MessageViewHolder>
             mFirebaseAdapter;
     private static final String TAG = "ChatFragment";
@@ -93,7 +97,7 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
     private ProgressBar mProgressBar;
     private EditText mMessageEditText;
     private ImageView mAddMessageImageView;
-    String roomId;
+    String roomId, roomCreator;
     View view;
 
     public ChatFragment() {
@@ -114,6 +118,7 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
 
         value = (EnteredActivity) getActivity();
         roomId = value.roomId;
+        roomCreator = value.roomCreator;
 
         // Initialize ProgressBar and RecyclerView.
         mProgressBar = (ProgressBar) view.findViewById(R.id.progressBar);
@@ -125,6 +130,7 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
 
         // New child entries
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        banUser = FirebaseDatabase.getInstance().getReference();
         SnapshotParser<ChatMessage> parser = new SnapshotParser<ChatMessage>() {
             @Override
             public ChatMessage parseSnapshot(DataSnapshot dataSnapshot) {
@@ -151,7 +157,62 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
             @Override
             protected void onBindViewHolder(final MessageViewHolder viewHolder,
                                             int position,
-                                            ChatMessage chatMessage) {
+                                            final ChatMessage chatMessage) {
+                if (mFirebaseUser.getDisplayName().equals(roomCreator)) {
+                    viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            CharSequence[] options = new CharSequence[]{
+                                    "ban User",
+                                    "cancel"
+                            };
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                            builder.setTitle("Ban " + chatMessage.getName() + "?");
+                            builder.setItems(options, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    if (i == 0) {
+
+                                        /*banUser.child("member/" + chatMessage.getName() + "/" + roomId + "/status").setValue("banned");*/
+                                        Query myTopPostsQuery = banUser.child("user").orderByChild("displayName").equalTo(chatMessage.getName());
+                                        myTopPostsQuery.addChildEventListener(new ChildEventListener() {
+                                            @Override
+                                            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @android.support.annotation.Nullable String s) {
+                                                Log.i(TAG, "his name is" + dataSnapshot.getKey());
+                                                banUser.child("member/" + dataSnapshot.getKey() + "/dogs/status").setValue("banned");
+                                            }
+
+                                            @Override
+                                            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @android.support.annotation.Nullable String s) {
+
+                                            }
+
+                                            @Override
+                                            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                                            }
+
+                                            @Override
+                                            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @android.support.annotation.Nullable String s) {
+
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }
+                                    if (i == 1) {
+
+                                    }
+                                }
+                            });
+
+                            builder.show();
+                        }
+                    });
+                }
                 mProgressBar.setVisibility(ProgressBar.INVISIBLE);
                 if (chatMessage.getText() != null) {
                     viewHolder.messageTextView.setText(chatMessage.getText());
@@ -159,6 +220,7 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
                     viewHolder.messageImageView.setVisibility(ImageView.GONE);
                 } else if (chatMessage.getImageUrl() != null) {
                     String imageUrl = chatMessage.getImageUrl();
+
                     if (imageUrl.startsWith("gs://")) {
                         StorageReference storageReference = FirebaseStorage.getInstance()
                                 .getReferenceFromUrl(imageUrl);
@@ -184,6 +246,7 @@ public class ChatFragment extends Fragment implements GoogleApiClient.OnConnecti
                     }
                     viewHolder.messageImageView.setVisibility(ImageView.VISIBLE);
                     viewHolder.messageTextView.setVisibility(TextView.GONE);
+
                 }
 
 

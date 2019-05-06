@@ -33,6 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class RoomFragment extends Fragment implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener, RoomDialogFragment.OnRoomCreate {
     private static String TAG = "RoomFragment";
+    private String roomCreator;
 
 
     //connection to roomDialogFragment interface
@@ -52,7 +53,7 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
     public MainActivity value;
     public String testUid;
     final FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference findRoom;
+    DatabaseReference findRoom, removeRoom;
     DatabaseReference mkRoom;
     DatabaseReference inputUser;
     DatabaseReference checkUser;
@@ -90,6 +91,8 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
         checkUser = FirebaseDatabase.getInstance().getReference("user");
         findRoom = database.getReference("member");
         roomRef = database.getReference().child("room");
+        removeRoom = database.getReference();
+
 
 
 
@@ -108,9 +111,11 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
         return view;
     }
 
+
     @Override
     public void onStart() {
         super.onStart();
+
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
         if (mFirebaseUser == null) {
@@ -143,7 +148,8 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
                                     @Override
                                     public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
                                         final String requestRoomName = dataSnapshot.getKey().toString();
-                                        Log.i(TAG, "data i got is: " + requestRoomName);
+
+
                                         final String requestRoomOwner = dataSnapshot.child("ownerDisplayName").getValue().toString();
                                         Log.i(TAG, "data i got is: " + requestRoomOwner);
                                         final String requestOwnerUid = dataSnapshot.child("ownerUid").getValue().toString();
@@ -176,12 +182,12 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
                                             public void onClick(View view) {
                                                 Toast.makeText(getActivity(), "you just deleted: " + holder.roomName.getText().toString(), Toast.LENGTH_SHORT).show();
                                                 getRef(position).removeValue();
-                                                inputUser.child("room/" + holder.roomName.getText().toString()).removeValue();
+
+                                                Log.i(TAG, "this should delete: " + holder.roomName.getText().toString());
                                                 inputUser.child("messages/" + holder.roomName.getText().toString()).removeValue();
                                                 inputUser.child("flashcard/" + holder.roomName.getText().toString()).removeValue();
                                                 inputUser.child("quiz/" + holder.roomName.getText().toString()).removeValue();
-                                                //GOTTA GET RID OF EVERYBODY MEMBERSHIT TO THIS ROOM, BANNED OR NOT
-
+                                                inputUser.child("room/" + holder.roomName.getText().toString()).removeValue();
                                             }
                                         });
                                         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -191,8 +197,10 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
                                                         , Toast.LENGTH_SHORT)
                                                         .show();
                                                 roomID = holder.roomName.getText().toString();
+                                                roomCreator = holder.roomOwner.getText().toString();
                                                 Intent intent = new Intent(getContext(), EnteredActivity.class);
                                                 intent.putExtra("ROOM_DATA", roomID);
+                                                intent.putExtra("ROOM_OWNER", roomCreator);
                                                 startActivity(intent);
                                             }
                                         });
@@ -287,6 +295,7 @@ public class RoomFragment extends Fragment implements View.OnClickListener, Goog
 
         }
     }
+
 
     private void roomExist(final String room) {
 

@@ -66,7 +66,7 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
     int count = 0;
 
     Button btnOpenFlashList;
-    String roomId;
+    String roomId, roomCreator;
     private View view;
     Button btnOpenFlashDialog, btnSendAnswer, btnExportFlashcard;
     public TextView tvFlashcardQuestion, tvFlashcardOwner, tvSetAnon;
@@ -86,7 +86,7 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
 
     LinearLayout linearLayout;
 
-    private DatabaseReference checkFlash;
+    private DatabaseReference checkFlash, checkLive;
     private RecyclerView mFlashcardRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
 
@@ -109,7 +109,7 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
         } else {
             mUsername = mFirebaseUser.getDisplayName();
 
-            Toast.makeText(getActivity(), "you are: " + mFirebaseUser.getDisplayName() + " in Room: " + roomId + "quiz fragment", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "you are: " + mFirebaseUser.getDisplayName() + " in Room: " + roomId + "quiz fragment, it's creator is: " + roomCreator, Toast.LENGTH_SHORT).show();
 
         }
     }
@@ -137,10 +137,12 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
         btnExportFlashcard.setOnClickListener(this);
         value = (EnteredActivity) getActivity();
         roomId = value.roomId;
+        roomCreator = value.roomCreator;
         exportFlashcard = database.getReference();
         mkFlashcard = database.getReference("flashcard");
         findFlashcard = database.getReference("flashcard/" + roomId);
         checkFlash = database.getReference("flashcard");
+        checkLive = database.getReference();
 
         linearLayout = view.findViewById(R.id.answersLayout);
 
@@ -211,11 +213,27 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
                             @Override
                             public void onClick(View view) {
                                 if (etFlashcardAnswer.length() >= 1) {
-                                    if (cbSetAnon.isChecked()) {
-                                        checkFlash.child(roomId + "/" + flashcard.getQuestion() + "/" + mFirebaseUser.getDisplayName()).setValue(anonInputCheck + etFlashcardAnswer.getText().toString());
-                                    } else {
-                                        checkFlash.child(roomId + "/" + flashcard.getQuestion() + "/" + mFirebaseUser.getDisplayName()).setValue(etFlashcardAnswer.getText().toString());
-                                    }
+                                    checkLive.child("flashcard/" + roomId + "/" + flashcard.getQuestion()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            if (dataSnapshot.exists()) {
+                                                if (cbSetAnon.isChecked()) {
+                                                    checkFlash.child(roomId + "/" + flashcard.getQuestion() + "/" + mFirebaseUser.getDisplayName()).setValue(anonInputCheck + etFlashcardAnswer.getText().toString());
+                                                } else {
+                                                    checkFlash.child(roomId + "/" + flashcard.getQuestion() + "/" + mFirebaseUser.getDisplayName()).setValue(etFlashcardAnswer.getText().toString());
+                                                }
+                                                Log.i(TAG, "yeh it's real" + dataSnapshot.getKey());
+                                            } else {
+                                                Toast.makeText(getContext(), "The room/question creator had deleted the question", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                        }
+                                    });
+
                                 } else {
                                     Toast.makeText(getContext(), "please input 1 or more characters", Toast.LENGTH_SHORT).show();
                                 }
@@ -291,7 +309,7 @@ public class FlashCardFragment extends Fragment implements View.OnClickListener,
                     }
                 });
 
-                if (flashcard.getUser().equals(mFirebaseUser.getDisplayName())) {
+                if (flashcard.getUser().equals(mFirebaseUser.getDisplayName()) || mFirebaseUser.getDisplayName().equals(roomCreator)) {
                     viewHolder.deleteButton.setVisibility(View.VISIBLE);
                     viewHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
                         @Override

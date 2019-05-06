@@ -64,7 +64,7 @@ public class RoomDialogFragment extends DialogFragment implements View.OnClickLi
                 break;
             case R.id.getmActionCancel:
                 String rmName = edtCreateRoomName.getText().toString();
-                String rmPass = edtCreatePassword.getText().toString();
+                String rmPass = "aaaa";
                 Log.i(TAG, rmName + " " + rmPass);
                 if ((rmName.trim().length() >= 4 && rmPass.trim().length() >= 4)) {
                     Log.i(TAG, "yeh 4 characters");

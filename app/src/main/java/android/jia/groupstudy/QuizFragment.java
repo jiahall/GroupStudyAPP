@@ -62,7 +62,7 @@ public class QuizFragment extends Fragment implements View.OnClickListener, Quiz
 
     private String mUsername;
     private FirebaseAuth mFirebaseAuth;
-    String roomId;
+    String roomId, roomCreator;
     private View view;
     Button btnOpenQuizDialog, btnExportQuiz;
     public EnteredActivity value;
@@ -120,6 +120,7 @@ public class QuizFragment extends Fragment implements View.OnClickListener, Quiz
         btnExportQuiz.setOnClickListener(this);
         value = (EnteredActivity) getActivity();
         roomId = value.roomId;
+        roomCreator = value.roomCreator;
         mkQuiz = database.getReference("quiz");
         findQuiz = database.getReference("quiz/" + roomId);
         checkQuiz = database.getReference("quiz");
@@ -169,7 +170,7 @@ public class QuizFragment extends Fragment implements View.OnClickListener, Quiz
                 });
 
 
-                if (quiz.getUser().equals(mFirebaseUser.getDisplayName())) {
+                if (quiz.getUser().equals(mFirebaseUser.getDisplayName()) || mFirebaseUser.getDisplayName().equals(roomCreator)) {
                     viewHolder.deleteButton.setVisibility(View.VISIBLE);
                     viewHolder.deleteButton.setOnClickListener(new View.OnClickListener() {
                         @Override
